@@ -1,0 +1,2203 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مهندس المكتبة v2 | MaktabaPlay</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080f1a;--bg2:#0c1423;--card:#111827;--card2:#0f1d2e;
+  --brand:#22c55e;--accent:#06b6d4;--danger:#ef4444;--warn:#f59e0b;
+  --purple:#8b5cf6;--text:#e5e7eb;--muted:#6b7280;
+  --border:rgba(255,255,255,0.06);--border2:#1f2937;
+  --radius:12px;--radius-sm:8px;
+  --map-bg:#0d1b2a;--map-floor:#142030;--map-wall:#1e3a5f;
+  --map-entrance:#166534;--map-loan:#0e7490;--map-reference:#92400e;
+  --map-manuscript:#581c87;--map-digital:#065f46;--map-study:#1e3a5f;
+  --map-storage:#78350f;--map-admin:#7f1d1d;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;overflow-x:hidden}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:#1f2937;border-radius:3px}
+
+/* ─── HEADER ─── */
+#site-header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(8,15,26,0.92);backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--border2);
+  padding:0 16px;height:52px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.header-brand{display:flex;align-items:center;gap:8px}
+.header-logo{font-size:1.1rem;font-weight:800;color:var(--brand)}
+.hdr-badge{font-size:0.65rem;padding:2px 8px;border-radius:20px;font-weight:700}
+.hdr-level{background:rgba(6,182,212,.12);color:var(--accent);border:1px solid rgba(6,182,212,.25)}
+.hdr-score{background:rgba(245,158,11,.1);color:var(--warn);border:1px solid rgba(245,158,11,.22);display:flex;align-items:center;gap:4px}
+.speed-controls{display:flex;gap:4px;align-items:center}
+.speed-btn{padding:3px 8px;font-size:0.65rem;font-weight:700;font-family:'Tajawal',sans-serif;border-radius:6px;border:1px solid var(--border2);background:var(--card2);color:var(--muted);cursor:pointer;transition:all .15s}
+.speed-btn.active-speed{background:rgba(34,197,94,.15);color:var(--brand);border-color:rgba(34,197,94,.35)}
+.pause-btn{padding:4px 10px;font-size:0.7rem;font-weight:700;font-family:'Tajawal',sans-serif;border-radius:7px;border:1px solid rgba(245,158,11,.3);background:rgba(245,158,11,.1);color:var(--warn);cursor:pointer}
+
+/* ─── HUD ─── */
+#hud{background:linear-gradient(135deg,var(--bg2),var(--bg));border-bottom:1px solid var(--border2);padding:8px 14px;display:flex;gap:8px;flex-wrap:wrap}
+.hud-stat{flex:1;min-width:100px;background:var(--card);border:1px solid var(--border2);border-radius:8px;padding:7px 10px;display:flex;flex-direction:column;gap:2px;position:relative;overflow:hidden}
+.hud-stat::before{content:'';position:absolute;top:0;right:0;left:0;height:2px}
+.hud-stat.green::before{background:linear-gradient(90deg,transparent,var(--brand))}
+.hud-stat.cyan::before{background:linear-gradient(90deg,transparent,var(--accent))}
+.hud-stat.gold::before{background:linear-gradient(90deg,transparent,var(--warn))}
+.hud-stat.red::before{background:linear-gradient(90deg,transparent,var(--danger))}
+.hud-stat.purple::before{background:linear-gradient(90deg,transparent,var(--purple))}
+.hud-label{font-size:0.6rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.hud-value{font-size:1rem;font-weight:800}
+.hud-value.green{color:var(--brand)}.hud-value.cyan{color:var(--accent)}.hud-value.gold{color:var(--warn)}.hud-value.red{color:var(--danger)}.hud-value.purple{color:var(--purple)}
+.hud-bar{height:3px;background:var(--border2);border-radius:2px;margin-top:3px;overflow:hidden}
+.hud-bar-fill{height:100%;border-radius:2px;transition:width .6s}
+
+/* ─── MAIN LAYOUT ─── */
+#game-body{display:grid;grid-template-columns:1fr 260px;height:calc(100vh - 52px - 56px)}
+#main-area{display:flex;flex-direction:column;overflow:hidden}
+
+/* ─── TABS ─── */
+#tabs-nav{display:flex;background:var(--bg2);border-bottom:1px solid var(--border2);padding:0 12px;gap:1px;flex-shrink:0}
+.tab-btn{padding:11px 16px;font-family:'Tajawal',sans-serif;font-size:0.8rem;font-weight:600;cursor:pointer;background:none;border:none;color:var(--muted);border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:5px}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--brand);border-bottom-color:var(--brand)}
+#tabs-content{flex:1;overflow-y:auto;padding:16px}
+.tab-panel{display:none}
+.tab-panel.active{display:block;animation:fadeIn .2s ease}
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes glow{0%,100%{box-shadow:0 0 8px rgba(34,197,94,.2)}50%{box-shadow:0 0 22px rgba(34,197,94,.5)}}
+@keyframes floatUp{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-36px)}}
+@keyframes walk{0%{transform:translateX(0)}50%{transform:translateX(3px)}100%{transform:translateX(0)}}
+@keyframes blink{0%,100%{opacity:1}45%,55%{opacity:0.3}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ─── SECTION TITLE ─── */
+.section-title{font-size:.95rem;font-weight:800;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.section-title .dot{width:6px;height:6px;border-radius:50%;background:var(--brand);animation:pulse 2s infinite;flex-shrink:0}
+.section-desc{font-size:0.76rem;color:var(--muted);margin-bottom:14px;background:var(--card2);border:1px solid var(--border2);border-right:3px solid var(--accent);padding:9px 12px;border-radius:var(--radius-sm);line-height:1.75}
+
+/* ══════════════════════════════════════════════
+   MAP TAB – THE BIG UPGRADE
+══════════════════════════════════════════════ */
+#map-tab-layout{display:grid;grid-template-columns:1fr 190px;gap:14px;align-items:start}
+
+/* ════════════════════════════════════════
+   PIXEL ART MAP CANVAS
+════════════════════════════════════════ */
+#lib-map-wrap{
+  background:#050c14;
+  border:3px solid #1a3a5c;
+  border-radius:4px;
+  padding:8px;
+  position:relative;
+  overflow:hidden;
+  box-shadow: inset 0 0 30px rgba(0,0,0,.8), 0 0 20px rgba(6,182,212,.1);
+  /* Pixel border effect */
+  outline: 1px solid #0a1f35;
+}
+
+/* Scanline overlay for CRT effect */
+#lib-map-wrap::before {
+  content:'';
+  position:absolute;
+  inset:0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,.08) 2px,
+    rgba(0,0,0,.08) 4px
+  );
+  pointer-events:none;
+  z-index:20;
+}
+
+#lib-map-canvas{
+  display:grid;
+  grid-template-columns:repeat(10,1fr);
+  grid-template-rows:repeat(8,1fr);
+  gap:1px;
+  width:100%;
+  aspect-ratio:10/8;
+  position:relative;
+  background:#0a1520;
+  border:1px solid #0d2035;
+}
+
+/* ─── PIXEL FLOOR TILES ─── */
+.map-cell{
+  background:#0f1e2e;
+  border:none;
+  position:relative;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;
+  overflow:hidden;
+  min-height:0;
+  aspect-ratio:1;
+  /* Pixel tile texture via box shadow */
+  box-shadow: inset 1px 1px 0 rgba(255,255,255,.04), inset -1px -1px 0 rgba(0,0,0,.3);
+  image-rendering: pixelated;
+  transition: none;
+}
+
+/* Floor tile texture pattern */
+.map-cell::after {
+  content:'';
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at 25% 25%, rgba(255,255,255,.02) 1px, transparent 1px),
+    radial-gradient(circle at 75% 75%, rgba(255,255,255,.02) 1px, transparent 1px);
+  background-size: 4px 4px;
+  pointer-events:none;
+}
+
+.map-cell:hover:not(.map-wall-cell):not(.map-occupied){
+  background:#1a3020 !important;
+  box-shadow: inset 0 0 0 1px rgba(34,197,94,.6), inset 1px 1px 0 rgba(34,197,94,.2) !important;
+  cursor:crosshair;
+}
+
+/* ─── PIXEL WALL TILES ─── */
+.map-cell.map-wall-cell{
+  cursor:default;
+  background:#0d1e35 !important;
+  box-shadow: inset 2px 2px 0 #1a3a5c, inset -2px -2px 0 #061020 !important;
+}
+/* Brick pattern on walls */
+.map-cell.map-wall-cell::before {
+  content:'';
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(90deg, transparent 49%, rgba(6,30,50,.6) 49%, rgba(6,30,50,.6) 51%, transparent 51%),
+    linear-gradient(0deg, transparent 49%, rgba(6,30,50,.4) 49%, rgba(6,30,50,.4) 51%, transparent 51%);
+  background-size: 8px 8px;
+  background-position: 0 0, 4px 4px;
+}
+.map-cell.map-wall-cell::after { display:none; }
+
+.map-cell.map-occupied{cursor:default}
+
+/* ─── PIXEL CORRIDOR ─── */
+.room-corridor{
+  background:#0f1e2e !important;
+  cursor:default !important;
+}
+/* Corridor tile - lighter dots */
+.room-corridor::after {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(6,182,212,.06) 1px, transparent 1px);
+  background-size: 4px 4px;
+}
+
+/* ═══ PIXEL ROOM TILES ═══ */
+/* Each room has a distinct pixel-art floor pattern */
+
+.room-entrance{
+  background:#0d2b14 !important;
+  box-shadow: inset 2px 0 0 #22c55e, inset -2px 0 0 #166534, inset 0 2px 0 #16a34a, inset 0 -2px 0 #052e10 !important;
+}
+.room-entrance::after {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(34,197,94,.1) 0px, rgba(34,197,94,.1) 2px,
+    transparent 2px, transparent 4px
+  ) !important;
+}
+
+.room-loan{
+  background:#071e2b !important;
+  box-shadow: inset 2px 0 0 #0e7490, inset -2px 0 0 #065f78, inset 0 2px 0 #0891b2, inset 0 -2px 0 #042030 !important;
+}
+.room-loan::after {
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(14,116,144,.12) 0px, rgba(14,116,144,.12) 2px,
+    transparent 2px, transparent 6px
+  ) !important;
+}
+
+.room-reference{
+  background:#1e1206 !important;
+  box-shadow: inset 2px 0 0 #92400e, inset -2px 0 0 #78350f, inset 0 2px 0 #b45309, inset 0 -2px 0 #1c0f04 !important;
+}
+.room-reference::after {
+  background:
+    repeating-linear-gradient(90deg, rgba(245,158,11,.08) 0px, rgba(245,158,11,.08) 2px, transparent 2px, transparent 8px) !important;
+}
+
+.room-manuscript{
+  background:#12062b !important;
+  box-shadow: inset 2px 0 0 #581c87, inset -2px 0 0 #4c1d95, inset 0 2px 0 #6d28d9, inset 0 -2px 0 #0d0520 !important;
+}
+.room-manuscript::after {
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(139,92,246,.1) 0px, rgba(139,92,246,.1) 2px,
+    transparent 2px, transparent 6px
+  ) !important;
+}
+
+.room-digital{
+  background:#061a12 !important;
+  box-shadow: inset 2px 0 0 #065f46, inset -2px 0 0 #064e38, inset 0 2px 0 #047857, inset 0 -2px 0 #031408 !important;
+}
+.room-digital::after {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(52,211,153,.1) 1px, transparent 1px) !important;
+  background-size: 5px 5px !important;
+}
+
+.room-study{
+  background:#0a1428 !important;
+  box-shadow: inset 2px 0 0 #1e3a5f, inset -2px 0 0 #162d4e, inset 0 2px 0 #1d4ed8, inset 0 -2px 0 #060e1a !important;
+}
+.room-study::after {
+  background:
+    linear-gradient(rgba(6,182,212,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(6,182,212,.04) 1px, transparent 1px) !important;
+  background-size: 4px 4px !important;
+}
+
+.room-storage{
+  background:#1a0e04 !important;
+  box-shadow: inset 2px 0 0 #78350f, inset -2px 0 0 #5c2d0c, inset 0 2px 0 #92400e, inset 0 -2px 0 #120a02 !important;
+}
+.room-storage::after {
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(120,53,15,.15) 0px, rgba(120,53,15,.15) 3px,
+    transparent 3px, transparent 9px
+  ) !important;
+}
+
+.room-admin{
+  background:#1c0606 !important;
+  box-shadow: inset 2px 0 0 #7f1d1d, inset -2px 0 0 #6b1a1a, inset 0 2px 0 #991b1b, inset 0 -2px 0 #150404 !important;
+}
+.room-admin::after {
+  background:
+    radial-gradient(circle at 25% 25%, rgba(239,68,68,.1) 1px, transparent 1px),
+    radial-gradient(circle at 75% 75%, rgba(239,68,68,.1) 1px, transparent 1px) !important;
+  background-size: 6px 6px !important;
+}
+
+/* Room labels - pixel style */
+.room-label{
+  font-size:.38rem;
+  font-weight:900;
+  text-align:center;
+  line-height:1;
+  z-index:2;
+  position:relative;
+  pointer-events:none;
+  padding:1px;
+  text-shadow: 1px 1px 0 rgba(0,0,0,.9), -1px -1px 0 rgba(0,0,0,.9);
+  letter-spacing:0;
+}
+.room-icon{
+  font-size:.7rem;
+  z-index:2;
+  position:relative;
+  pointer-events:none;
+  filter: drop-shadow(0 0 2px rgba(0,0,0,.8));
+}
+.room-glow{position:absolute;inset:0;animation:glow 2s steps(2) infinite;pointer-events:none}
+
+/* Pixel hover tooltip */
+.map-tooltip{
+  position:absolute;bottom:calc(100% + 4px);right:50%;transform:translateX(50%);
+  background:#0a1520;
+  border:1px solid #1a3a5c;
+  border-radius:0;
+  padding:6px 8px;font-size:.65rem;white-space:nowrap;z-index:50;
+  box-shadow:3px 3px 0 #000, 2px 2px 0 #061020;
+  pointer-events:none;
+  opacity:0;transition:opacity .1s;
+  image-rendering: pixelated;
+}
+.map-tooltip::before {
+  content:'';
+  position:absolute;
+  bottom:-5px;
+  right:50%;transform:translateX(50%);
+  width:8px;height:5px;
+  background:#0a1520;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  border-left:1px solid #1a3a5c;
+  border-right:1px solid #1a3a5c;
+}
+.map-cell:hover .map-tooltip{opacity:1}
+
+/* ══════════════════════════════════════════════
+   PIXEL ART MAP SYSTEM
+══════════════════════════════════════════════ */
+
+/* Pixel font + rendering */
+@font-face {
+  font-family: 'PixelArabic';
+  src: local('Tajawal');
+}
+
+/* Force pixel rendering on canvas */
+#lib-map-canvas, #lib-map-canvas * {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* ─── PIXEL WALKING VISITORS ─── */
+#visitor-layer{position:absolute;inset:12px;pointer-events:none;z-index:10}
+
+/* Pixel character base */
+.visitor {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  transition: left 1.8s steps(6), top 1.8s steps(6);
+  z-index: 10;
+  image-rendering: pixelated;
+}
+.visitor canvas {
+  width: 20px;
+  height: 20px;
+  image-rendering: pixelated;
+}
+.visitor.moving .px-char { animation: px-walk 0.4s steps(2) infinite; }
+
+@keyframes px-walk {
+  0%   { transform: translateY(0px); }
+  50%  { transform: translateY(-2px); }
+  100% { transform: translateY(0px); }
+}
+
+/* Pixel staff badge */
+.staff-on-map{
+  position:absolute;width:18px;height:18px;
+  image-rendering: pixelated;
+  z-index:8;
+}
+.staff-on-map.working { animation: blink 3s steps(1) infinite; }
+
+/* Build cursor highlight */
+.map-cell.build-target:not(.map-wall-cell):not(.map-occupied){
+  background:rgba(34,197,94,.12)!important;
+  border-color:rgba(34,197,94,.6)!important;
+  animation:glow 1s steps(2) infinite;
+}
+
+/* ─── MAP SIDEBAR ─── */
+#map-sidebar{display:flex;flex-direction:column;gap:8px}
+.msb-title{font-size:.72rem;font-weight:700;color:var(--accent);margin-bottom:4px}
+.msb-item{
+  background:var(--card);border:1px solid var(--border2);border-radius:8px;
+  padding:9px 10px;cursor:pointer;transition:all .18s;
+  position:relative;overflow:hidden;
+}
+.msb-item::before{content:'';position:absolute;top:0;right:0;bottom:0;width:3px;background:transparent;transition:.2s}
+.msb-item:hover:not(.msb-locked):not(.msb-placed),.msb-item.msb-selected{border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.06)}
+.msb-item:hover:not(.msb-locked):not(.msb-placed)::before,.msb-item.msb-selected::before{background:var(--brand)}
+.msb-item.msb-placed{opacity:.65;cursor:not-allowed}
+.msb-item.msb-locked{opacity:.38;cursor:not-allowed}
+.msb-icon{font-size:1.2rem;margin-bottom:3px}
+.msb-name{font-size:.7rem;font-weight:700;color:var(--text)}
+.msb-cost{font-size:.62rem;color:var(--warn);margin-top:1px}
+.msb-tag{font-size:.55rem;padding:1px 5px;border-radius:6px;margin-top:3px;display:inline-block;font-weight:700}
+.msb-tag-placed{background:rgba(34,197,94,.15);color:var(--brand)}
+.msb-tag-lock{background:rgba(139,92,246,.15);color:var(--purple)}
+
+/* Map legend */
+#map-legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border2)}
+.leg-item{display:flex;align-items:center;gap:4px;font-size:.62rem;color:var(--muted)}
+.leg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+/* Map info bar */
+#map-infobar{background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;margin-top:10px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.mib-item{text-align:center}
+.mib-label{font-size:.58rem;color:var(--muted);font-weight:600}
+.mib-val{font-size:.82rem;font-weight:800;margin-top:2px}
+
+/* Penalty / Bonus box */
+#penalty-box{margin-top:10px}
+.penalty-line{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:7px;padding:8px 10px;font-size:.7rem;color:#fca5a5;display:flex;align-items:flex-start;gap:6px;line-height:1.5;margin-bottom:5px}
+.bonus-line{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:8px 10px;font-size:.7rem;color:#86efac;display:flex;align-items:flex-start;gap:6px;line-height:1.5;margin-bottom:5px}
+
+/* ─── HR ─── */
+.hr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.staff-card{background:var(--card);border:1px solid var(--border2);border-radius:var(--radius);padding:14px;position:relative;overflow:hidden;transition:all .22s}
+.staff-card::before{content:'';position:absolute;top:0;right:0;bottom:0;width:3px}
+.staff-card.hired{border-color:rgba(34,197,94,.2)}
+.staff-card.hired::before{background:var(--brand)}
+.staff-card:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.1)}
+.sc-badge{position:absolute;top:10px;left:10px;font-size:.58rem;font-weight:700;padding:2px 6px;border-radius:9px}
+.sc-badge.hired{background:rgba(34,197,94,.18);color:var(--brand);border:1px solid rgba(34,197,94,.3)}
+.sc-badge.avail{background:rgba(107,114,128,.15);color:var(--muted);border:1px solid rgba(107,114,128,.2)}
+.sc-icon{font-size:1.8rem;margin-bottom:6px}
+.sc-name{font-size:.84rem;font-weight:800;margin-bottom:2px}
+.sc-role{font-size:.66rem;color:var(--accent);font-weight:600;margin-bottom:6px}
+.sc-skills{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:7px}
+.skill-tag{font-size:.58rem;padding:2px 5px;border-radius:7px;font-weight:600;background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.2);color:var(--accent)}
+.sc-salary{font-size:.68rem;color:var(--warn);margin-bottom:3px}
+.sc-effect{font-size:.65rem;color:var(--muted);margin-bottom:9px;line-height:1.5}
+.sc-morale{font-size:.65rem;margin-bottom:9px}
+.sc-morale-bar{height:3px;background:var(--border2);border-radius:2px;margin-top:3px;overflow:hidden}
+.sc-morale-fill{height:100%;border-radius:2px;background:var(--brand);transition:width .5s}
+.sc-btn{width:100%;padding:7px;border-radius:7px;border:none;font-family:'Tajawal',sans-serif;font-size:.75rem;font-weight:700;cursor:pointer;transition:all .2s}
+.sc-btn.hire{background:rgba(34,197,94,.14);color:var(--brand);border:1px solid rgba(34,197,94,.28)}
+.sc-btn.hire:hover{background:rgba(34,197,94,.24)}
+.sc-btn.fire{background:rgba(239,68,68,.1);color:var(--danger);border:1px solid rgba(239,68,68,.2)}
+.sc-btn.fire:hover{background:rgba(239,68,68,.2)}
+
+/* ─── STAFF ON FLOOR display in HR ─── */
+.sc-location{font-size:.62rem;color:var(--brand);margin-bottom:6px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2);border-radius:5px;padding:3px 7px;display:inline-flex;align-items:center;gap:4px}
+.sc-location .loc-dot{width:5px;height:5px;border-radius:50%;background:var(--brand);animation:pulse 1.5s infinite}
+
+/* ─── ACQUISITION ─── */
+.acq-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.acq-card{background:var(--card);border:1px solid var(--border2);border-radius:var(--radius);padding:14px;transition:all .2s;position:relative}
+.acq-card:hover{border-color:rgba(245,158,11,.25);transform:translateY(-2px)}
+.acq-icon{font-size:1.8rem;margin-bottom:7px}
+.acq-name{font-size:.86rem;font-weight:800;margin-bottom:3px}
+.acq-desc{font-size:.7rem;color:var(--muted);margin-bottom:9px;line-height:1.65}
+.acq-stats{display:flex;gap:5px;margin-bottom:9px;flex-wrap:wrap}
+.acq-stat{font-size:.64rem;padding:2px 6px;border-radius:6px;font-weight:700}
+.acq-stat.green{background:rgba(34,197,94,.1);color:var(--brand);border:1px solid rgba(34,197,94,.2)}
+.acq-stat.cyan{background:rgba(6,182,212,.1);color:var(--accent);border:1px solid rgba(6,182,212,.2)}
+.acq-stat.gold{background:rgba(245,158,11,.1);color:var(--warn);border:1px solid rgba(245,158,11,.2)}
+.acq-price{font-size:.78rem;font-weight:700;color:var(--warn);margin-bottom:3px}
+.acq-count{font-size:.65rem;color:var(--muted);margin-bottom:9px}
+.acq-req{font-size:.63rem;padding:2px 6px;border-radius:6px;margin-bottom:8px;display:inline-block;font-weight:600}
+.acq-req.met{background:rgba(34,197,94,.1);color:var(--brand);border:1px solid rgba(34,197,94,.2)}
+.acq-req.unmet{background:rgba(239,68,68,.1);color:var(--danger);border:1px solid rgba(239,68,68,.2)}
+.acq-btn{width:100%;padding:8px;border-radius:7px;border:1px solid rgba(245,158,11,.28);font-family:'Tajawal',sans-serif;font-size:.76rem;font-weight:700;cursor:pointer;transition:all .2s;background:rgba(245,158,11,.14);color:var(--warn)}
+.acq-btn:hover:not(:disabled){background:rgba(245,158,11,.24)}
+.acq-btn:disabled{opacity:.35;cursor:not-allowed}
+.acq-level-lock{position:absolute;top:9px;left:9px;font-size:.58rem;font-weight:700;padding:2px 6px;border-radius:7px;background:rgba(139,92,246,.15);color:var(--purple);border:1px solid rgba(139,92,246,.25)}
+
+/* ─── ANALYTICS ─── */
+.ana-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:16px}
+.ana-card{background:var(--card);border:1px solid var(--border2);border-radius:var(--radius);padding:12px;text-align:center}
+.ana-num{font-size:1.4rem;font-weight:800;margin-bottom:2px}
+.ana-label{font-size:.65rem;color:var(--muted);font-weight:600}
+.chart-container{background:var(--card);border:1px solid var(--border2);border-radius:var(--radius);padding:14px;margin-bottom:14px}
+.chart-title{font-size:.76rem;font-weight:700;margin-bottom:10px}
+.chart-bars{display:flex;align-items:flex-end;gap:7px;height:72px;padding-bottom:3px}
+.chart-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1}
+.chart-bar{width:100%;border-radius:3px 3px 0 0;transition:height .5s;min-height:2px}
+.chart-bar-label{font-size:.58rem;color:var(--muted);text-align:center}
+.chart-bar-val{font-size:.58rem;font-weight:700;color:var(--text)}
+.expense-tbl{width:100%;border-collapse:collapse}
+.expense-tbl th{background:var(--card2);padding:8px 10px;font-size:.68rem;font-weight:700;color:var(--muted);text-align:right;border-bottom:1px solid var(--border2)}
+.expense-tbl td{padding:8px 10px;font-size:.74rem;border-bottom:1px solid var(--border)}
+.etbl-income{color:var(--brand);font-weight:700}
+.etbl-expense{color:var(--danger);font-weight:700}
+
+/* ─── LIVE LOG SIDEBAR ─── */
+#live-log-panel{background:var(--card);border-right:1px solid var(--border2);display:flex;flex-direction:column;overflow:hidden}
+#live-log-header{padding:11px 13px;border-bottom:1px solid var(--border2);font-size:.76rem;font-weight:700;color:var(--accent);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--brand);animation:pulse 1.4s infinite}
+#log-filter{display:flex;gap:3px;padding:6px 8px;border-bottom:1px solid var(--border2);flex-shrink:0}
+.log-filter-btn{font-size:.58rem;padding:2px 7px;border-radius:7px;border:1px solid var(--border2);background:none;color:var(--muted);cursor:pointer;font-family:'Tajawal',sans-serif;font-weight:600;transition:.15s}
+.log-filter-btn.active-filter{color:var(--brand);border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.08)}
+#live-log{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:4px}
+.log-entry{font-size:.68rem;padding:6px 8px;border-radius:6px;border-right:3px solid;line-height:1.5;animation:slideIn .25s;background:rgba(255,255,255,.015);flex-shrink:0}
+.log-entry.success{border-color:var(--brand);color:#86efac}
+.log-entry.warning{border-color:var(--warn);color:#fcd34d}
+.log-entry.danger{border-color:var(--danger);color:#fca5a5}
+.log-entry.info{border-color:var(--accent);color:#67e8f9}
+.log-entry.purple{border-color:var(--purple);color:#c4b5fd}
+.log-time{font-size:.58rem;color:var(--muted);display:block;margin-top:1px}
+#level-progress{padding:9px 12px;border-top:1px solid var(--border2);flex-shrink:0}
+.level-bar-wrap{background:var(--border2);border-radius:4px;height:4px;overflow:hidden;margin-top:5px}
+.level-bar-fill{height:100%;background:linear-gradient(90deg,var(--brand),var(--accent));transition:width .8s;border-radius:4px}
+.level-info{display:flex;justify-content:space-between;font-size:.63rem;color:var(--muted)}
+#achievements-bar{padding:6px 12px;border-top:1px solid var(--border2);display:flex;gap:5px;flex-wrap:wrap;flex-shrink:0}
+.ach-badge{font-size:.58rem;padding:2px 7px;border-radius:9px;border:1px solid var(--border2);background:var(--card2);color:var(--muted);display:flex;align-items:center;gap:3px}
+.ach-badge.earned{color:var(--warn);border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.08)}
+
+/* Quests + Tips */
+#quests-widget{padding:9px 11px;border-top:1px solid var(--border2);flex-shrink:0;max-height:190px;overflow-y:auto}
+#leaderboard-widget{padding:9px 11px;border-top:1px solid var(--border2);flex-shrink:0}
+#tip-widget{padding:7px 11px;border-top:1px solid var(--border2);flex-shrink:0;background:rgba(6,182,212,.025)}
+
+/* ─── MODALS ─── */
+#modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.8);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+#modal-overlay.active{opacity:1;pointer-events:all}
+#modal-box{background:var(--card);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:24px;max-width:460px;width:92%;box-shadow:0 0 60px rgba(0,0,0,.6);transform:translateY(16px);transition:transform .25s;position:relative}
+#modal-overlay.active #modal-box{transform:translateY(0)}
+.modal-icon{font-size:2.2rem;text-align:center;margin-bottom:10px}
+.modal-severity{font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:12px;display:inline-block;margin-bottom:9px}
+.sev-high{background:rgba(239,68,68,.15);color:var(--danger);border:1px solid rgba(239,68,68,.3)}
+.sev-med{background:rgba(245,158,11,.15);color:var(--warn);border:1px solid rgba(245,158,11,.3)}
+.sev-low{background:rgba(34,197,94,.12);color:var(--brand);border:1px solid rgba(34,197,94,.25)}
+.modal-title{font-size:1rem;font-weight:800;margin-bottom:7px}
+.modal-desc{font-size:.76rem;color:var(--muted);line-height:1.75;margin-bottom:14px;background:var(--card2);border:1px solid var(--border2);border-radius:7px;padding:10px}
+.modal-choices{display:flex;flex-direction:column;gap:7px}
+.modal-choice-btn{padding:10px 14px;border-radius:8px;border:1px solid var(--border2);background:var(--card2);color:var(--text);font-family:'Tajawal',sans-serif;font-size:.76rem;font-weight:600;cursor:pointer;text-align:right;transition:all .2s;line-height:1.5}
+.modal-choice-btn:hover{border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.06)}
+.modal-crisis-timer{position:absolute;top:16px;left:16px;font-size:.7rem;font-weight:700;color:var(--danger);background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:3px 9px}
+.choice-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
+.ctag{font-size:.6rem;padding:1px 6px;border-radius:5px;font-weight:700;background:rgba(255,255,255,.06);color:var(--muted)}
+
+/* ─── LEVEL UP ─── */
+#levelup-overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.85);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+#levelup-overlay.active{opacity:1;pointer-events:all}
+#levelup-box{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid rgba(34,197,94,.25);border-radius:16px;padding:28px;max-width:400px;width:90%;text-align:center;box-shadow:0 0 60px rgba(34,197,94,.2)}
+.lu-icon{font-size:3rem;margin-bottom:10px}
+.lu-title{font-size:1.3rem;font-weight:800;color:var(--brand);margin-bottom:5px}
+.lu-sub{font-size:.8rem;color:var(--accent);margin-bottom:14px}
+.lu-perks{text-align:right;margin-bottom:18px}
+.lu-perk{font-size:.75rem;color:var(--muted);padding:5px 0;border-bottom:1px solid var(--border);line-height:1.5}
+.lu-perk:last-child{border-bottom:none}
+.btn-lu{background:linear-gradient(135deg,var(--brand),#16a34a);color:#fff;border:none;border-radius:9px;padding:11px 32px;font-family:'Tajawal',sans-serif;font-size:.88rem;font-weight:800;cursor:pointer;margin-top:4px}
+
+/* ─── GAME OVER ─── */
+#gameover-overlay{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.9);backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+#gameover-overlay.active{opacity:1;pointer-events:all}
+#gameover-box{background:var(--card);border:1px solid rgba(239,68,68,.25);border-radius:16px;padding:28px;max-width:400px;width:90%;text-align:center;box-shadow:0 0 60px rgba(239,68,68,.15)}
+.go-icon{font-size:3rem;margin-bottom:10px}
+.go-title{font-size:1.2rem;font-weight:800;color:var(--danger);margin-bottom:5px}
+.go-sub{font-size:.78rem;color:var(--muted);margin-bottom:16px}
+.go-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+.go-stat{background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:10px 8px}
+.go-stat-num{font-size:1.1rem;font-weight:800;color:var(--accent);margin-bottom:2px}
+.go-stat-label{font-size:.6rem;color:var(--muted)}
+.btn-go{background:var(--danger);color:#fff;border:none;border-radius:9px;padding:11px 32px;font-family:'Tajawal',sans-serif;font-size:.85rem;font-weight:800;cursor:pointer}
+
+/* ─── TOAST ─── */
+.toast-container{position:fixed;bottom:20px;right:20px;z-index:500;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.toast{background:var(--card);border:1px solid var(--border2);border-radius:9px;padding:9px 14px;font-size:.75rem;font-weight:600;max-width:280px;box-shadow:0 6px 20px rgba(0,0,0,.4);animation:slideIn .25s;border-right:3px solid var(--accent)}
+.toast.success{border-right-color:var(--brand);color:#86efac}
+.toast.error{border-right-color:var(--danger);color:#fca5a5}
+.toast.warn{border-right-color:var(--warn);color:#fcd34d}
+.toast.info{border-right-color:var(--accent);color:#67e8f9}
+
+/* Float numbers */
+.float-num{position:fixed;font-size:.82rem;font-weight:800;pointer-events:none;z-index:600;animation:floatUp 1s forwards}
+.float-num.pos{color:var(--brand)}
+.float-num.neg{color:var(--danger)}
+
+/* Footer */
+#site-footer{background:var(--bg2);border-top:1px solid var(--border2);padding:8px 16px;font-size:.65rem;color:var(--muted);text-align:center;position:relative}
+
+/* Alert */
+.alert-tag{background:rgba(239,68,68,.12);color:var(--danger);border:1px solid rgba(239,68,68,.2);border-radius:7px;padding:4px 10px;font-size:.66rem;font-weight:700;display:none;margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header id="site-header">
+  <div class="header-brand">
+    <span class="header-logo">📖 مهندس المكتبة</span>
+    <span class="hdr-badge hdr-level" id="hdr-level">مكتبة مدرسية</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <span class="hdr-badge hdr-score">⭐ <span id="hdr-score">0</span></span>
+    <div class="speed-controls">
+      <span style="font-size:.6rem;color:var(--muted)">سرعة:</span>
+      <button class="speed-btn active-speed" data-speed="1">×1</button>
+      <button class="speed-btn" data-speed="2">×2</button>
+      <button class="speed-btn" data-speed="3">×3</button>
+    </div>
+    <button class="pause-btn" id="pause-btn">⏸ إيقاف</button>
+  </div>
+</header>
+
+<!-- HUD -->
+<div id="hud">
+  <div class="hud-stat green">
+    <div class="hud-label">الميزانية</div>
+    <div class="hud-value green" id="hud-budget">10,000 ج</div>
+    <div class="hud-bar"><div class="hud-bar-fill" id="hb-budget" style="background:var(--brand);width:100%"></div></div>
+  </div>
+  <div class="hud-stat cyan">
+    <div class="hud-label">رضا المستفيدين</div>
+    <div class="hud-value cyan" id="hud-satisfaction">70%</div>
+    <div class="hud-bar"><div class="hud-bar-fill" id="hb-satisfaction" style="background:var(--accent);width:70%"></div></div>
+  </div>
+  <div class="hud-stat green">
+    <div class="hud-label">جودة الفهرسة</div>
+    <div class="hud-value green" id="hud-quality">40%</div>
+    <div class="hud-bar"><div class="hud-bar-fill" id="hb-quality" style="background:var(--brand);width:40%"></div></div>
+  </div>
+  <div class="hud-stat gold">
+    <div class="hud-label">الأوعية</div>
+    <div class="hud-value gold" id="hud-collections">500</div>
+  </div>
+  <div class="hud-stat purple">
+    <div class="hud-label">التاريخ</div>
+    <div class="hud-value purple" id="hud-date">1/1/2026</div>
+  </div>
+  <div class="hud-stat red">
+    <div class="hud-label">الزوار اليوم</div>
+    <div class="hud-value red" id="hud-visitors">0</div>
+  </div>
+</div>
+
+<!-- GAME BODY -->
+<div id="game-body">
+  <div id="main-area">
+    <!-- TABS -->
+    <nav id="tabs-nav">
+      <button class="tab-btn active" data-tab="map">🗺️ خريطة المكتبة</button>
+      <button class="tab-btn" data-tab="hr">👥 الموارد البشرية</button>
+      <button class="tab-btn" data-tab="acquisition">📦 التزويد والاقتناء</button>
+      <button class="tab-btn" data-tab="analytics">📊 التحليلات</button>
+    </nav>
+
+    <div id="tabs-content">
+
+      <!-- ══════════ MAP TAB ══════════ -->
+      <div class="tab-panel active" id="tab-map">
+        <div class="section-title"><span class="dot"></span> الخريطة التفاعلية للمكتبة</div>
+        <div class="section-desc">اختر قسماً من القائمة الجانبية ثم انقر خلية فارغة في المسقط لتركيبه. الزوار الحقيقيون سيتحركون داخل المكتبة، والموظفون يظهرون في مواقعهم الفعلية.</div>
+
+        <div id="map-tab-layout">
+          <!-- THE MAP -->
+          <div>
+            <div id="lib-map-wrap">
+              <div id="lib-map-canvas"></div>
+              <div id="visitor-layer"></div>
+            </div>
+            <div id="map-legend"></div>
+            <div id="map-infobar">
+              <div class="mib-item"><div class="mib-label">مشغولة</div><div class="mib-val" id="mib-occ" style="color:var(--brand)">0/36</div></div>
+              <div class="mib-item"><div class="mib-label">الأقسام</div><div class="mib-val" id="mib-sec" style="color:var(--accent)">0</div></div>
+              <div class="mib-item"><div class="mib-label">الموظفون</div><div class="mib-val" id="mib-staff" style="color:var(--purple)">0</div></div>
+              <div class="mib-item"><div class="mib-label">المخطوطات</div><div class="mib-val" id="mib-manu" style="color:var(--warn)">–</div></div>
+            </div>
+            <div id="penalty-box"></div>
+          </div>
+
+          <!-- MAP SIDEBAR -->
+          <div id="map-sidebar">
+            <div class="msb-title">🏗️ إضافة قسم جديد</div>
+            <div id="msb-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ HR TAB ══════════ -->
+      <div class="tab-panel" id="tab-hr">
+        <div class="section-title"><span class="dot"></span> الموارد البشرية والكوادر</div>
+        <span class="alert-tag" id="hr-alert">⚠️ قاعة المخطوطات تحتاج أمين مخطوطات!</span>
+        <div id="staff-productivity" style="margin-bottom:14px"></div>
+        <div class="hr-grid" id="hr-grid"></div>
+      </div>
+
+      <!-- ══════════ ACQUISITION TAB ══════════ -->
+      <div class="tab-panel" id="tab-acquisition">
+        <div class="section-title"><span class="dot"></span> التزويد واقتناء المصادر</div>
+        <div class="acq-grid" id="acq-grid"></div>
+      </div>
+
+      <!-- ══════════ ANALYTICS TAB ══════════ -->
+      <div class="tab-panel" id="tab-analytics">
+        <div class="section-title"><span class="dot"></span> لوحة التحليلات</div>
+        <div class="ana-grid" id="analytics-grid"></div>
+        <div id="analytics-rating" style="background:var(--card);border:1px solid var(--border2);border-radius:var(--radius);padding:14px;text-align:center;margin-bottom:14px"></div>
+        <div class="chart-container">
+          <div class="chart-title">📈 إيرادات ومصروفات الأشهر الماضية</div>
+          <div id="monthly-chart" class="chart-bars"></div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden">
+          <table class="expense-tbl">
+            <thead><tr><th>البيان</th><th>النوع</th><th>المبلغ</th><th>التاريخ</th></tr></thead>
+            <tbody id="expense-log"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /tabs-content -->
+  </div><!-- /main-area -->
+
+  <!-- LIVE LOG -->
+  <aside id="live-log-panel">
+    <div id="live-log-header">
+      <div style="display:flex;align-items:center;gap:6px"><div class="live-dot"></div> سجل الأحداث</div>
+      <span id="live-event-count" style="font-size:.6rem;color:var(--muted)">0</span>
+    </div>
+    <div id="log-filter">
+      <button class="log-filter-btn active-filter" data-filter="all">الكل</button>
+      <button class="log-filter-btn" data-filter="success">✅</button>
+      <button class="log-filter-btn" data-filter="danger">🚨</button>
+      <button class="log-filter-btn" data-filter="info">ℹ️</button>
+    </div>
+    <div id="live-log"></div>
+    <div id="quests-widget"></div>
+    <div id="leaderboard-widget"></div>
+    <div id="tip-widget">
+      <div style="font-size:.6rem;color:var(--accent);font-weight:700;margin-bottom:3px">💡 نصيحة</div>
+      <div id="tip-text" style="font-size:.64rem;color:var(--muted);line-height:1.6;transition:opacity .3s"></div>
+    </div>
+    <div id="achievements-bar"></div>
+    <div id="level-progress">
+      <div class="level-info">
+        <span id="lp-label">التقدم للمستوى التالي</span>
+        <span id="lp-pct">0%</span>
+      </div>
+      <div class="level-bar-wrap"><div class="level-bar-fill" id="level-bar-fill" style="width:0%"></div></div>
+      <div class="level-info" style="margin-top:3px">
+        <span id="lp-current">المستوى 1</span>
+        <span id="lp-next">المستوى 2</span>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- FOOTER -->
+<footer id="site-footer">
+  <span id="footer-ticker" style="color:var(--accent);font-weight:600"></span>
+  &nbsp;|&nbsp; MaktabaPlay © 2026 – منصة الألعاب التعليمية الأولى لعلم المكتبات والمعلومات
+</footer>
+
+<!-- TOAST -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- CRISIS MODAL -->
+<div id="modal-overlay">
+  <div id="modal-box">
+    <div class="modal-crisis-timer" id="crisis-timer" style="display:none">⏱ <span id="crisis-countdown">30</span>ث</div>
+    <div class="modal-icon" id="modal-icon">⚠️</div>
+    <div class="modal-severity sev-high" id="modal-severity">أزمة</div>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-desc" id="modal-desc"></div>
+    <div class="modal-choices" id="modal-choices"></div>
+  </div>
+</div>
+
+<!-- LEVEL UP -->
+<div id="levelup-overlay">
+  <div id="levelup-box">
+    <div class="lu-icon">🎓</div>
+    <div class="lu-title" id="lu-title">ترقية!</div>
+    <div class="lu-sub" id="lu-sub"></div>
+    <div class="lu-perks" id="lu-perks"></div>
+    <button class="btn-lu" id="levelup-btn">🚀 متابعة البناء</button>
+  </div>
+</div>
+
+<!-- GAME OVER -->
+<div id="gameover-overlay">
+  <div id="gameover-box">
+    <div class="go-icon">💔</div>
+    <div class="go-title" id="go-title">انهيار!</div>
+    <div class="go-sub" id="go-sub"></div>
+    <div class="go-stats" id="go-stats"></div>
+    <button class="btn-go" id="restart-btn">🔄 إعادة من الصفر</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════
+const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const fmt=n=>Math.round(n).toLocaleString('ar-EG');
+
+// ═══════════════════════════════════════════════════
+//  GAME STATE
+// ═══════════════════════════════════════════════════
+const G={
+  budget:10000, satisfaction:70, quality:40, collections:500,
+  score:0, day:1, month:1, year:2026, level:1,
+  levelNames:['مكتبة مدرسية صغيرة','مكتبة كلية أكاديمية','مكتبة عامة إقليمية','المكتبة الوطنية الضخمة'],
+  levelReqs:[null,
+    {budget:40000,satisfaction:80,quality:70},
+    {budget:120000,satisfaction:85,quality:80},
+    {budget:300000,satisfaction:90,quality:88}],
+  levelPerks:[null,
+    ['رفع سعة الشبكة','ميزانية إضافية 5,000 ج','فتح: مستودع أرشيفي رقمي','قسم الإدارة يصبح إلزامياً'],
+    ['فتح: نظام الإيداع القانوني','فتح: خدمة الإعارة بين المكتبات','رفع رواتب الكوادر +20%','خدمات مجتمعية متوسعة'],
+    ['أرشفة وطنية رقمية','فتح: مركز توثيق التراث الوطني','رواتب أكاديمية متطورة','الإيداع القانوني الشامل']],
+  // 10×8 grid = 80 cells
+  mapCells: Array(80).fill(null),
+  selectedSection: null,
+  staff:{cataloger:false,reference:false,archivist:false,volunteer:false},
+  staffMorale:{cataloger:80,reference:80,archivist:80,volunteer:80},
+  staffServiceCount:{cataloger:0,reference:0,archivist:0,volunteer:0},
+  acqCounts:{books:0,database:0,manuscripts:0,periodicals:0,digital:0,equipment:0,rare:0},
+  financeLedger:[], monthlyIncome:0, monthlyExpense:0,
+  crisisActive:false, gameOver:false,
+  totalServiced:0, totalRejected:0,
+  ticks:0, crisisCooldown:0,
+  achievements:{firstSection:false,firstStaff:false,firstDB:false,firstCrisis:false,level2:false,level3:false,satisfaction90:false,quality80:false},
+  monthlyHistory:[], logCount:0,
+  gameSpeed:1, currentFilter:'all', crisisManaged:0,
+  visitorsToday:0
+};
+
+// ═══════════════════════════════════════════════════
+//  MAP LAYOUT  (10 cols × 8 rows = indices 0-79)
+//  Fixed cells: walls, corridors, entrance
+// ═══════════════════════════════════════════════════
+// Cell types: null=buildable, 'wall'=wall, 'corridor'=path, section keys
+const COL=10, ROW=8;
+const idx=(r,c)=>r*COL+c;
+
+// Define fixed structure
+const FIXED_CELLS={}; // idx -> type
+// Outer walls (row 0, row 7, col 0, col 9 – corners only actually we use as border cells)
+// We'll make col0 and col9 walls on all rows except entrance
+for(let r=0;r<ROW;r++){
+  FIXED_CELLS[idx(r,0)]='wall';
+  FIXED_CELLS[idx(r,9)]='wall';
+}
+for(let c=0;c<COL;c++){
+  FIXED_CELLS[idx(0,c)]='wall';
+  FIXED_CELLS[idx(7,c)]='wall';
+}
+// Entrance on bottom-center
+FIXED_CELLS[idx(7,4)]='entrance';
+FIXED_CELLS[idx(7,5)]='entrance';
+// Horizontal corridor row 6 (main corridor)
+for(let c=1;c<9;c++) FIXED_CELLS[idx(6,c)]='corridor';
+// Vertical corridor col5 rows 1-5
+for(let r=1;r<6;r++) FIXED_CELLS[idx(r,5)]='corridor';
+
+// Pre-place entrance in state
+G.mapCells[idx(7,4)]='entrance';
+G.mapCells[idx(7,5)]='entrance';
+
+// Buildable cells = all non-fixed, non-entrance rows 1-5, cols 1-4 and 6-8
+// That's left wing (c1-c4, r1-r5) = 20 cells and right wing (c6-c8, r1-r5) = 15 cells
+
+// ═══════════════════════════════════════════════════
+//  SECTION DEFINITIONS (with preferred zones)
+// ═══════════════════════════════════════════════════
+const SECTIONS={
+  loan:     {name:'قسم الإعارة',icon:'📤',cost:1500,cls:'loan',desc:'كاونتر الإعارة ورد الكتب – مصدر الإيراد الأساسي',color:'#0e7490',preferZone:'near-entrance'},
+  reference:{name:'قاعة المراجع',icon:'📚',cost:2200,cls:'reference',desc:'قاعة الموسوعات والمراجع المتخصصة',color:'#92400e',preferZone:'right'},
+  manuscript:{name:'قاعة المخطوطات',icon:'📜',cost:4500,cls:'manuscript',desc:'تتطلب أمين مخطوطات للتفعيل',color:'#581c87',requires:'archivist',preferZone:'back'},
+  digital:  {name:'المعمل الرقمي',icon:'💻',cost:3800,cls:'digital',desc:'محطات بحث رقمي وإنترنت عالي السرعة',color:'#065f46',preferZone:'right'},
+  study:    {name:'قاعة الاستذكار',icon:'🤫',cost:1300,cls:'study',desc:'⚠️ عزلها عن الأقسام الصاخبة',color:'#1e3a5f',preferZone:'back'},
+  storage:  {name:'مستودع الأرشيف',icon:'🗄️',cost:900,cls:'storage',desc:'تخزين الأوعية القديمة والمؤرشفة',color:'#78350f',preferZone:'back'},
+  admin:    {name:'مكتب الإدارة',icon:'🏢',cost:1800,cls:'admin',desc:'يرفع الكفاءة الإدارية ويقلل الأخطاء',color:'#7f1d1d',preferZone:'left'}
+};
+
+const STAFF_DEF=[
+  {id:'cataloger',name:'مفهرس MARC21',role:'الفهرسة والتصنيف',icon:'🗂️',emoji:'🗂️',salary:800,skills:['MARC21','RDA','OPAC','DDC'],effect:'يرفع جودة البيانات +8%/شهر',desk:'reference',deskFallback:'loan'},
+  {id:'reference',name:'أخصائي مرجعي',role:'المراجع والإرشاد',icon:'🔎',emoji:'🔍',salary:750,skills:['بحث متقدم','EBSCO','إرشاد','ILL'],effect:'يرفع رضا المستفيدين +6%/شهر',desk:'reference',deskFallback:'loan'},
+  {id:'archivist',name:'أمين مخطوطات',role:'المخطوطات والأرشيف',icon:'📜',emoji:'📜',salary:950,skills:['ترميم','أرشفة رقمية','مخطوطات','حفظ وصون'],effect:'يُفعّل قاعة المخطوطات ويزيد المجموعات',desk:'manuscript',deskFallback:'storage'},
+  {id:'volunteer',name:'متطوع أكاديمي',role:'مساعد إداري',icon:'🎓',emoji:'🎓',salary:200,skills:['إعارة','ترتيب','بيانات','استقبال'],effect:'يخفف الضغط ويرفع السعة',desk:'loan',deskFallback:'admin'}
+];
+
+const ACQ_ITEMS=[
+  {id:'books',name:'دفعة كتب ورقية',icon:'📖',cost:2000,desc:'إضافة 200 عنوان متخصص وفق خطة تنمية المجموعات',collAdd:200,qualAdd:5,satAdd:3,reqLevel:1},
+  {id:'database',name:'قواعد بيانات أكاديمية',icon:'🖥️',cost:5000,desc:'اشتراك في JSTOR وScienceDirect وEBSCO لسنة كاملة',collAdd:0,qualAdd:22,satAdd:12,reqLevel:1,reqSection:'digital'},
+  {id:'manuscripts',name:'مخطوطات تراثية',icon:'📜',cost:8000,desc:'اقتناء مخطوطات نادرة من مزادات التراث الوطني',collAdd:50,qualAdd:10,satAdd:6,reqLevel:2,reqStaff:'archivist'},
+  {id:'periodicals',name:'دوريات علمية محكّمة',icon:'📰',cost:1500,desc:'اشتراك في الدوريات المتخصصة والمحكّمة',collAdd:100,qualAdd:10,satAdd:6,reqLevel:1},
+  {id:'digital',name:'مستودع DSpace',icon:'☁️',cost:6500,desc:'مستودع رقمي وفق معايير Dublin Core وOAI-PMH',collAdd:0,qualAdd:28,satAdd:9,reqLevel:2},
+  {id:'equipment',name:'أجهزة مسح ضوئي',icon:'🖨️',cost:3500,desc:'ماسحات ضوئية عالية الدقة للرقمنة والأرشفة',collAdd:0,qualAdd:8,satAdd:4,reqLevel:1},
+  {id:'rare',name:'موسوعات نادرة',icon:'📔',cost:12000,desc:'موسوعات علمية نادرة ومجموعات تراثية حصرية',collAdd:300,qualAdd:15,satAdd:8,reqLevel:3}
+];
+
+const CRISES=[
+  {id:'ransomware',icon:'🛡️',severity:'sev-high',severityLabel:'أزمة سيبرانية حرجة',title:'هجوم فيروس فدية على نظام Koha!',desc:'تعرّض نظام إدارة المكتبة لهجوم سيبراني متطور. المخترقون يطلبون فدية لإعادة الوصول للفهرس الرقمي.',choices:[
+    {label:'دفع الفدية وإنقاذ الفهرس فوراً',cost:-3500,qualLoss:0,satLoss:-4,tags:['💸 -3,500 ج','✅ إنقاذ الفهرس','-4% رضا']},
+    {label:'رفض الفدية والاعتماد على النسخ الاحتياطية',cost:-600,qualLoss:-22,satLoss:-12,tags:['💸 -600 ج','📉 -22% جودة','-12% رضا']}]},
+  {id:'flood',icon:'💧',severity:'sev-med',severityLabel:'أزمة بيئية',title:'تسريب مياه في مخزن المخطوطات!',desc:'اكتشف تسريباً في سقف مخزن البدروم. الرطوبة تهدد المخطوطات النادرة.',choices:[
+    {label:'ترميم فوري بمواد متخصصة',cost:-2800,qualLoss:0,satLoss:-2,tags:['💸 -2,800 ج','✅ صون المخطوطات']},
+    {label:'توثيق الأضرار فقط وتأجيل الإصلاح',cost:0,qualLoss:-10,satLoss:-15,collLoss:30,tags:['🆓 لا تكلفة','📉 -10% جودة','-30 وعاء']}]},
+  {id:'audit',icon:'🏛️',severity:'sev-med',severityLabel:'تفتيش أكاديمي',title:'زيارة مفاجئة للجنة ضمان الجودة!',desc:'وصلت لجنة تقييم الاعتماد الأكاديمي للزيارة الميدانية. التقييم سيؤثر على التمويل.',choices:[
+    {label:'تقرير ذاتي شفاف مع خطة تطوير',cost:-900,qualBonus:12,satBonus:18,tags:['💸 -900 ج','✅ +18% رضا','+12% جودة']},
+    {label:'عرض تقديمي احترافي مُخرَج',cost:-2000,qualBonus:3,satBonus:7,tags:['💸 -2,000 ج','+7% رضا','+3% جودة']}]},
+  {id:'donation',icon:'🎁',severity:'sev-low',severityLabel:'فرصة استثنائية',title:'عرض تبرع بمجموعة أكاديمية نادرة!',desc:'أسرة أستاذ جامعي تعرض التبرع بمكتبته الخاصة التي تحتوي مخطوطات ومراجع نادرة.',choices:[
+    {label:'قبول التبرع والالتزام بالتوثيق الأكاديمي',cost:-600,collBonus:320,qualBonus:14,satBonus:9,tags:['💸 -600 ج','📚 +320 وعاء','+14% جودة']},
+    {label:'الاعتذار بسبب محدودية المساحة',cost:0,qualLoss:-6,satLoss:-6,tags:['🆓 لا تكلفة','-6% جودة','-6% رضا']}]},
+  {id:'electricity',icon:'⚡',severity:'sev-high',severityLabel:'عطل تقني طارئ',title:'انقطاع كهربائي في المعمل الرقمي!',desc:'توقف المعمل الرقمي كلياً بسبب عطل في الشبكة الكهربائية. الباحثون عالقون.',choices:[
+    {label:'استدعاء فني طوارئ فوري',cost:-1500,satBonus:5,tags:['💸 -1,500 ج','✅ إصلاح فوري','+5% رضا']},
+    {label:'انتظار الفريق الرسمي غداً',cost:0,satLoss:-18,qualLoss:-5,tags:['🆓 لا تكلفة','-18% رضا','-5% جودة']}]},
+  {id:'conference',icon:'🎓',severity:'sev-low',severityLabel:'حدث أكاديمي',title:'دعوة لاستضافة مؤتمر المعلومات الإقليمي!',desc:'دعوة رسمية لاستضافة المؤتمر السنوي. ستضع مكتبتك في الواجهة الأكاديمية.',choices:[
+    {label:'قبول الاستضافة والتجهيز الكامل',cost:-3000,satBonus:22,qualBonus:8,scoreBon:200,tags:['💸 -3,000 ج','✅ +22% رضا','+200 نقطة']},
+    {label:'الاعتذار والتوصية بمكتبة أخرى',cost:0,satLoss:-8,tags:['🆓 لا تكلفة','-8% رضا']}]}
+];
+
+const VISITOR_EVENTS=[
+  ()=>{
+    const hasLoan=G.mapCells.includes('loan'), hasCat=G.staff.cataloger;
+    if(hasLoan&&hasCat){const inc=70+rand(0,40);G.budget+=inc;G.totalServiced++;G.visitorsToday++;G.staffServiceCount.cataloger++;addLog('success',`📚 مستفيد طلب كتاباً أكاديمياً – خُدم بنجاح (+${inc} ج)`);addFinance('إيراد إعارة','income',inc);floatNum('+'+inc+' ج','pos');}
+    else if(hasLoan){const inc=25;G.budget+=inc;G.satisfaction=Math.max(0,G.satisfaction-2);G.totalServiced++;G.visitorsToday++;addLog('warning',`📚 مستفيد خُدم بصعوبة – الفهرس غير مكتمل (+${inc} ج، -2% رضا)`);}
+    else{G.satisfaction=Math.max(0,G.satisfaction-5);G.totalRejected++;addLog('danger',`😡 مستفيد غاضب: لا يوجد قسم إعارة! (-5% رضا)`);}
+  },
+  ()=>{
+    const hasDig=G.mapCells.includes('digital'), hasDb=G.acqCounts.database>0;
+    if(hasDig&&hasDb){const inc=55+rand(0,30);G.budget+=inc;G.satisfaction=Math.min(100,G.satisfaction+1);G.totalServiced++;G.visitorsToday++;addLog('success',`💻 باحث أجرى بحثاً رقمياً عبر EBSCO (+${inc} ج)`);addFinance('إيراد رقمي','income',inc);floatNum('+'+inc+' ج','pos');}
+    else if(hasDig){const inc=18;G.budget+=inc;G.totalServiced++;G.visitorsToday++;addLog('info',`💻 باحث استخدم المعمل الرقمي – قواعد البيانات محدودة (+${inc} ج)`);}
+    else{G.satisfaction=Math.max(0,G.satisfaction-4);G.totalRejected++;addLog('danger',`😤 باحث: لا معمل رقمي متاح! (-4% رضا)`);}
+  },
+  ()=>{
+    const hasManu=G.mapCells.includes('manuscript'), hasArch=G.staff.archivist;
+    if(hasManu&&hasArch){const inc=110+rand(0,50);G.budget+=inc;G.quality=Math.min(100,G.quality+1);G.totalServiced++;G.visitorsToday++;G.staffServiceCount.archivist++;addLog('success',`📜 باحث في التراث استفاد من المخطوطات (+${inc} ج، +1% جودة)`);addFinance('إيراد مخطوطات','income',inc);floatNum('+'+inc+' ج','pos');}
+    else if(hasManu&&!hasArch){G.satisfaction=Math.max(0,G.satisfaction-6);addLog('danger',`📜 قاعة المخطوطات مغلقة! غياب الأمين. (-6% رضا)`);}
+    else{addLog('info',`📜 باحث سأل عن مخطوطات – القاعة غير متوفرة بعد.`);}
+  },
+  ()=>{
+    const hasRef=G.mapCells.includes('reference'), hasRefStaff=G.staff.reference;
+    if(hasRef&&hasRefStaff){const inc=45+rand(0,25);G.budget+=inc;G.totalServiced++;G.visitorsToday++;G.staffServiceCount.reference++;addLog('success',`🔍 طالب دكتوراه أُرشد بنجاح (+${inc} ج)`);addFinance('إيراد إرشاد','income',inc);floatNum('+'+inc+' ج','pos');}
+    else if(hasRef){const inc=20;G.budget+=inc;G.totalServiced++;G.visitorsToday++;addLog('info',`📚 مستفيد في قاعة المراجع – بدون أخصائي (+${inc} ج)`);}
+    else{G.satisfaction=Math.max(0,G.satisfaction-3);G.totalRejected++;addLog('warning',`😕 طالب بحث عن مرجع ولم يجد القاعة. (-3% رضا)`);}
+  },
+  ()=>{
+    const hasStudy=G.mapCells.includes('study');
+    if(hasStudy){const inc=15+rand(0,10);G.budget+=inc;G.totalServiced++;G.visitorsToday++;G.satisfaction=Math.min(100,G.satisfaction+0.5);addLog('success',`🤫 طلاب يستذكرون في القاعة الهادئة (+${inc} ج، +0.5% رضا)`);addFinance('إيراد استذكار','income',inc);floatNum('+'+inc+' ج','pos');}
+    else{addLog('info',`🤫 طالب يبحث عن مكان هادئ للمذاكرة – لا قاعة متاحة.`);}
+  },
+  ()=>{
+    if(G.staff.volunteer){G.satisfaction=Math.min(100,G.satisfaction+1);G.staffServiceCount.volunteer++;addLog('info',`🎓 المتطوع ساعد في ترتيب الأرفف – انتهى بكفاءة (+1% رضا)`);}
+    else{addLog('info',`📦 أرفف تحتاج ترتيباً – لا يوجد متطوع.`);}
+  }
+];
+
+// ═══════════════════════════════════════════════════
+//  LOGGING
+// ═══════════════════════════════════════════════════
+let allLogs=[];
+function addLog(type,msg){
+  const entry={type,msg,time:`${G.day}/${G.month}/${G.year}`};
+  allLogs.unshift(entry);
+  if(allLogs.length>120) allLogs.pop();
+  G.logCount++;
+  document.getElementById('live-event-count').textContent=G.logCount;
+  renderLog();
+}
+function renderLog(){
+  const el=document.getElementById('live-log');
+  const filtered=G.currentFilter==='all'?allLogs:allLogs.filter(l=>l.type===G.currentFilter);
+  el.innerHTML=filtered.slice(0,40).map(l=>`<div class="log-entry ${l.type}">${l.msg}<span class="log-time">${l.time}</span></div>`).join('');
+}
+
+function addFinance(label,type,amount){
+  G.financeLedger.unshift({label,type,amount,date:`${G.day}/${G.month}/${G.year}`});
+  if(G.financeLedger.length>50) G.financeLedger.pop();
+  if(type==='income') G.monthlyIncome+=amount;
+  else G.monthlyExpense+=amount;
+}
+
+function showToast(msg,type='info',dur=3000){
+  const el=document.createElement('div');
+  el.className=`toast ${type}`;
+  el.textContent=msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity .3s';setTimeout(()=>el.remove(),320);},dur);
+}
+
+function floatNum(txt,cls){
+  const el=document.createElement('div');
+  el.className=`float-num ${cls}`;
+  el.textContent=txt;
+  el.style.cssText=`left:${rand(30,70)}vw;top:${rand(30,60)}vh`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1100);
+}
+
+// ═══════════════════════════════════════════════════
+//  HUD RENDER
+// ═══════════════════════════════════════════════════
+function renderHUD(){
+  document.getElementById('hud-budget').textContent=fmt(G.budget)+' ج';
+  document.getElementById('hud-satisfaction').textContent=Math.round(G.satisfaction)+'%';
+  document.getElementById('hud-quality').textContent=Math.round(G.quality)+'%';
+  document.getElementById('hud-collections').textContent=fmt(G.collections);
+  document.getElementById('hud-date').textContent=`${G.day}/${G.month}/${G.year}`;
+  document.getElementById('hud-visitors').textContent=G.visitorsToday;
+  document.getElementById('hdr-score').textContent=fmt(G.score);
+  document.getElementById('hdr-level').textContent=G.levelNames[G.level-1];
+  document.getElementById('hb-budget').style.width=clamp(G.budget/200,0,100)+'%';
+  document.getElementById('hb-satisfaction').style.width=G.satisfaction+'%';
+  document.getElementById('hb-quality').style.width=G.quality+'%';
+  // Level bar
+  const req=G.levelReqs[G.level];
+  if(req){
+    const pBudget=clamp(G.budget/req.budget*100,0,100);
+    const pSat=clamp(G.satisfaction/req.satisfaction*100,0,100);
+    const pQual=clamp(G.quality/req.quality*100,0,100);
+    const pct=Math.round((pBudget+pSat+pQual)/3);
+    document.getElementById('level-bar-fill').style.width=pct+'%';
+    document.getElementById('lp-pct').textContent=pct+'%';
+    document.getElementById('lp-current').textContent='المستوى '+G.level;
+    document.getElementById('lp-next').textContent='المستوى '+(G.level+1);
+    document.getElementById('lp-label').textContent='التقدم للمستوى التالي';
+  } else {
+    document.getElementById('level-bar-fill').style.width='100%';
+    document.getElementById('lp-label').textContent='أعلى مستوى!';
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  THE MAP
+// ═══════════════════════════════════════════════════
+function renderMap(){
+  const canvas=document.getElementById('lib-map-canvas');
+  canvas.innerHTML='';
+
+  const {penalties,bonuses}=calcPenaltiesAndBonuses();
+
+  for(let i=0;i<80;i++){
+    const r=Math.floor(i/COL), c=i%COL;
+    const fixed=FIXED_CELLS[i];
+    const placed=G.mapCells[i];
+    const div=document.createElement('div');
+    div.className='map-cell';
+    div.dataset.idx=i;
+
+    if(fixed==='wall'){
+      div.classList.add('map-wall-cell');
+      div.innerHTML=`<span style="font-size:.55rem;color:rgba(255,255,255,.15)">▪</span>`;
+    } else if(fixed==='corridor'){
+      div.classList.add('map-occupied','room-corridor');
+      div.innerHTML=`<span style="font-size:.45rem;color:rgba(255,255,255,.2)">·</span>`;
+    } else if(placed==='entrance'||fixed==='entrance'){
+      div.classList.add('map-occupied','room-entrance');
+      div.innerHTML=`<span class="room-icon">🚪</span><span class="room-label" style="color:#86efac">مدخل</span>`;
+    } else if(placed&&SECTIONS[placed]){
+      const s=SECTIONS[placed];
+      div.classList.add('map-occupied',`room-${placed}`);
+      // Check if staff is at this section
+      const staffHere=STAFF_DEF.filter(st=>G.staff[st.id]&&st.desk===placed).map(st=>st.emoji).join('');
+      div.innerHTML=`
+        <span class="room-icon">${s.icon}</span>
+        <span class="room-label" style="color:${s.color}aa;font-size:.38rem">${s.name}</span>
+        ${staffHere?`<span style="font-size:.6rem;margin-top:1px">${staffHere}</span>`:''}
+      `;
+      // Tooltip
+      const tip=document.createElement('div');
+      tip.className='map-tooltip';
+      const staffPresent=STAFF_DEF.filter(st=>G.staff[st.id]&&st.desk===placed);
+      tip.innerHTML=`<b>${s.icon} ${s.name}</b><br>${s.desc}${staffPresent.length?'<br>'+staffPresent.map(st=>st.icon+' '+st.name).join(', '):''}`;
+      div.appendChild(tip);
+    } else {
+      // Buildable empty cell
+      if(G.selectedSection) div.classList.add('build-target');
+      div.innerHTML=`<span style="font-size:.5rem;color:rgba(255,255,255,.1)">${i+1}</span>`;
+      div.addEventListener('click',()=>{
+        if(!G.selectedSection){showToast('اختر قسماً من القائمة أولاً','error');return;}
+        const s=SECTIONS[G.selectedSection];
+        if(G.mapCells.includes(G.selectedSection)&&G.selectedSection!=='study'){showToast('هذا القسم مُركّب مسبقاً','error');return;}
+        if(G.budget<s.cost){showToast('الميزانية غير كافية لهذا القسم!','error');return;}
+        G.budget-=s.cost;
+        G.mapCells[i]=G.selectedSection;
+        addFinance('تركيب: '+s.name,'expense',s.cost);
+        addLog('info',`🏗️ تم تركيب ${s.icon} ${s.name} في الموقع (${r+1},${c+1}) (-${fmt(s.cost)} ج)`);
+        showToast('✅ تم تركيب '+s.name,'success');
+        floatNum('-'+fmt(s.cost)+' ج','neg');
+        if(!G.achievements.firstSection){G.achievements.firstSection=true;unlockAchievement('🏗️','أول قسم مُركّب');}
+        G.selectedSection=null;
+        renderMap(); renderHUD(); renderMSBSidebar(); checkQuests();
+      });
+    }
+    canvas.appendChild(div);
+  }
+
+  renderMSBSidebar();
+  renderMapInfoBar();
+  renderPenaltyBox(penalties,bonuses);
+  renderStaffOnMap();
+  renderMapLegend();
+}
+
+function renderMapInfoBar(){
+  const placed=G.mapCells.filter(Boolean).length;
+  const sections=new Set(G.mapCells.filter(v=>v&&v!=='entrance'&&v!=='corridor'));
+  const hiredCount=Object.values(G.staff).filter(Boolean).length;
+  const manuOk=G.mapCells.includes('manuscript')&&G.staff.archivist;
+  document.getElementById('mib-occ').textContent=placed+'/80';
+  document.getElementById('mib-sec').textContent=sections.size;
+  document.getElementById('mib-staff').textContent=hiredCount;
+  document.getElementById('mib-manu').innerHTML=G.mapCells.includes('manuscript')
+    ?(manuOk?'<span style="color:var(--brand)">✅ فعّالة</span>':'<span style="color:var(--danger)">⚠️ بلا أمين</span>')
+    :'<span style="color:var(--muted)">–</span>';
+}
+
+function renderMapLegend(){
+  const el=document.getElementById('map-legend');
+  const items=[
+    {color:'#166534',label:'مدخل'},
+    {color:'#1e3a5f',label:'ممر'},
+    {color:'#0e7490',label:'إعارة'},
+    {color:'#92400e',label:'مراجع'},
+    {color:'#581c87',label:'مخطوطات'},
+    {color:'#065f46',label:'رقمي'},
+    {color:'#1e3a5f',label:'استذكار'},
+    {color:'#78350f',label:'أرشيف'},
+    {color:'#7f1d1d',label:'إدارة'},
+  ];
+  el.innerHTML=items.map(it=>`<div class="leg-item"><div class="leg-dot" style="background:${it.color}"></div>${it.label}</div>`).join('');
+}
+
+function renderMSBSidebar(){
+  const sb=document.getElementById('msb-list');
+  sb.innerHTML='';
+  Object.entries(SECTIONS).forEach(([key,s])=>{
+    const placed=G.mapCells.includes(key);
+    const canAfford=G.budget>=s.cost;
+    const div=document.createElement('div');
+    div.className='msb-item';
+    if(placed&&key!=='study') div.classList.add('msb-placed');
+    else if(!canAfford) div.classList.add('msb-locked');
+    if(G.selectedSection===key) div.classList.add('msb-selected');
+    let tag='';
+    if(placed&&key!=='study') tag=`<span class="msb-tag msb-tag-placed">✅ مركّب</span>`;
+    else if(s.requires) tag=`<span class="msb-tag msb-tag-lock">🔒 يتطلب أمين</span>`;
+    div.innerHTML=`<div class="msb-icon">${s.icon}</div><div class="msb-name">${s.name}</div><div class="msb-cost">${s.cost>0?fmt(s.cost)+' ج':'مجاناً'}</div>${tag}`;
+    if((!placed||key==='study')&&canAfford){
+      div.addEventListener('click',()=>{
+        G.selectedSection=(G.selectedSection===key)?null:key;
+        renderMSBSidebar();
+        document.querySelectorAll('.map-cell:not(.map-occupied):not(.map-wall-cell)').forEach(c=>{
+          if(G.selectedSection) c.classList.add('build-target');
+          else c.classList.remove('build-target');
+        });
+      });
+    }
+    sb.appendChild(div);
+  });
+}
+
+function renderPenaltyBox(penalties,bonuses){
+  const box=document.getElementById('penalty-box');
+  box.innerHTML=bonuses.map(b=>`<div class="bonus-line">✅ ${b.msg}</div>`).join('')+
+    penalties.map(p=>`<div class="penalty-line">⚠️ ${p.msg}</div>`).join('');
+}
+
+function calcPenaltiesAndBonuses(){
+  const penalties=[],bonuses=[];
+  const cells=G.mapCells;
+  if(!cells.includes('loan')) penalties.push({msg:'لا يوجد قسم إعارة – الخدمة الرئيسية معطّلة',sat:-5,qual:0});
+  if(cells.includes('manuscript')&&!G.staff.archivist) penalties.push({msg:'قاعة المخطوطات بدون أمين مخطوطات',sat:-6,qual:-3});
+  if(cells.includes('digital')&&G.acqCounts.database>0) bonuses.push({msg:'المعمل الرقمي + قواعد البيانات = خدمة بحثية متكاملة',sat:3,qual:5});
+  if(cells.includes('storage')&&cells.includes('manuscript')){
+    const si=cells.indexOf('storage'), mi=cells.indexOf('manuscript');
+    const sr=Math.floor(si/COL),sc=si%COL,mr=Math.floor(mi/COL),mc=mi%COL;
+    if(Math.abs(sr-mr)<=2&&Math.abs(sc-mc)<=2) bonuses.push({msg:'مستودع الأرشيف مجاور للمخطوطات: +4% جودة/شهر',sat:0,qual:4});
+  }
+  if(cells.includes('admin')&&G.staff.cataloger) bonuses.push({msg:'مكتب الإدارة + مفهرس: كفاءة إدارية مرتفعة',sat:2,qual:3});
+  if(G.staff.reference&&cells.includes('reference')) bonuses.push({msg:'أخصائي مرجعي في قاعة المراجع: +3% رضا/شهر',sat:3,qual:0});
+  return{penalties,bonuses};
+}
+
+// ═══════════════════════════════════════════════════
+//  PIXEL ART CHARACTER DRAWING ENGINE
+// ═══════════════════════════════════════════════════
+
+// Pixel character types: each is 8x8 pixel grid
+// Colors encoded as hex strings or null (transparent)
+const PX_CHARS = {
+  // Generic visitor (blue shirt)
+  visitor_m: {
+    pixels:[
+      [0,0,'#e8c49a','#e8c49a',0,0,0,0],
+      [0,'#e8c49a','#e8c49a','#e8c49a','#e8c49a',0,0,0],
+      [0,0,'#1d4ed8','#1d4ed8',0,0,0,0],
+      [0,'#1d4ed8','#1d4ed8','#1d4ed8','#1d4ed8',0,0,0],
+      [0,'#1d4ed8','#1d4ed8','#1d4ed8','#1d4ed8',0,0,0],
+      [0,'#374151','#374151',0,'#374151','#374151',0,0],
+      [0,'#374151','#374151',0,'#374151','#374151',0,0],
+      [0,0,0,0,0,0,0,0]
+    ]
+  },
+  // Female visitor (red dress)
+  visitor_f: {
+    pixels:[
+      [0,0,'#f9c5a7','#f9c5a7',0,0,0,0],
+      [0,'#f9c5a7','#f9c5a7','#f9c5a7','#f9c5a7','#8b4513',0,0],
+      [0,0,'#dc2626','#dc2626',0,0,0,0],
+      [0,'#dc2626','#dc2626','#dc2626','#dc2626',0,0,0],
+      [0,'#dc2626','#dc2626','#dc2626','#dc2626',0,0,0],
+      [0,'#dc2626','#dc2626','#dc2626','#dc2626',0,0,0],
+      [0,'#e8c49a','#9ca3af',0,'#9ca3af','#e8c49a',0,0],
+      [0,0,0,0,0,0,0,0]
+    ]
+  },
+  // Student (green backpack)
+  visitor_student: {
+    pixels:[
+      [0,0,'#d4a76a','#d4a76a',0,0,0,0],
+      [0,'#d4a76a','#d4a76a','#d4a76a','#d4a76a',0,0,0],
+      ['#166534',0,'#15803d','#15803d','#166534',0,0,0],
+      ['#166534','#166534','#15803d','#15803d','#166534',0,0,0],
+      ['#166534','#166534','#15803d','#15803d','#166534',0,0,0],
+      [0,'#374151','#374151',0,'#374151',0,0,0],
+      [0,'#374151','#374151',0,'#374151',0,0,0],
+      [0,0,0,0,0,0,0,0]
+    ]
+  },
+  // Professor (dark coat)
+  visitor_prof: {
+    pixels:[
+      [0,0,'#c9a987','#c9a987',0,0,0,0],
+      [0,'#c9a987','#c9a987','#c9a987','#c9a987',0,0,0],
+      [0,'#1e1b4b','#1e1b4b','#1e1b4b','#1e1b4b',0,0,0],
+      [0,'#1e1b4b','#f8fafc','#1e1b4b','#1e1b4b',0,0,0],
+      [0,'#1e1b4b','#1e1b4b','#1e1b4b','#1e1b4b',0,0,0],
+      [0,'#1e1b4b','#1e1b4b',0,'#1e1b4b','#1e1b4b',0,0],
+      [0,'#1e1b4b','#1e1b4b',0,'#1e1b4b','#1e1b4b',0,0],
+      [0,0,0,0,0,0,0,0]
+    ]
+  },
+  // Child visitor
+  visitor_child: {
+    pixels:[
+      [0,0,'#f9c5a7','#f9c5a7',0,0,0,0],
+      [0,'#f9c5a7','#f9c5a7','#f9c5a7','#f9c5a7',0,0,0],
+      [0,0,'#f97316','#f97316',0,0,0,0],
+      [0,'#f97316','#f97316','#f97316','#f97316',0,0,0],
+      [0,'#f97316','#f97316','#f97316','#f97316',0,0,0],
+      [0,'#f97316',0,0,'#f97316',0,0,0],
+      [0,'#6b7280',0,0,'#6b7280',0,0,0],
+      [0,0,0,0,0,0,0,0]
+    ]
+  },
+  // Staff cataloger (white shirt + tie)
+  staff_cataloger: {
+    pixels:[
+      [0,0,'#d4a76a','#d4a76a',0,0,0,0],
+      [0,'#d4a76a','#d4a76a','#d4a76a','#d4a76a',0,0,0],
+      [0,'#f8fafc','#dc2626','#f8fafc','#f8fafc',0,0,0],
+      [0,'#f8fafc','#dc2626','#f8fafc','#f8fafc',0,0,0],
+      [0,'#f8fafc','#f8fafc','#f8fafc','#f8fafc',0,0,0],
+      [0,'#1e3a5f','#1e3a5f',0,'#1e3a5f','#1e3a5f',0,0],
+      [0,'#1e3a5f','#1e3a5f',0,'#1e3a5f','#1e3a5f',0,0],
+      [0,0,0,0,0,0,0,0]
+    ]
+  },
+  // Staff reference (glasses + teal)
+  staff_reference: {
+    pixels:[
+      [0,0,'#c9a987','#c9a987',0,0,0,0],
+      [0,'#c9a987','#0891b2','#c9a987','#0891b2',0,0,0],// glasses
+      [0,0,'#0e7490','#0e7490',0,0,0,0],
+      [0,'#0e7490','#0e7490','#0e7490','#0e7490',0,0,0],
+      [0,'#0e7490','#0e7490','#0e7490','#0e7490',0,0,0],
+      [0,'#1e3a5f','#1e3a5f',0,'#1e3a5f','#1e3a5f',0,0],
+      [0,'#1e3a5f','#1e3a5f',0,'#1e3a5f','#1e3a5f',0,0],
+      [0,0,0,0,0,0,0,0]
+    ]
+  },
+  // Staff archivist (purple robe)
+  staff_archivist: {
+    pixels:[
+      [0,0,'#e8c49a','#e8c49a',0,0,0,0],
+      [0,'#e8c49a','#e8c49a','#e8c49a','#e8c49a',0,0,0],
+      [0,'#6d28d9','#6d28d9','#6d28d9','#6d28d9',0,0,0],
+      [0,'#6d28d9','#7c3aed','#6d28d9','#6d28d9',0,0,0],
+      [0,'#6d28d9','#6d28d9','#6d28d9','#6d28d9',0,0,0],
+      [0,'#4c1d95','#4c1d95',0,'#4c1d95','#4c1d95',0,0],
+      [0,'#4c1d95','#4c1d95',0,'#4c1d95','#4c1d95',0,0],
+      [0,0,0,0,0,0,0,0]
+    ]
+  },
+  // Staff volunteer (yellow vest)
+  staff_volunteer: {
+    pixels:[
+      [0,0,'#d4a76a','#d4a76a',0,0,0,0],
+      [0,'#d4a76a','#d4a76a','#d4a76a','#d4a76a',0,0,0],
+      [0,'#ca8a04','#fbbf24','#fbbf24','#ca8a04',0,0,0],
+      [0,'#ca8a04','#fbbf24','#fbbf24','#ca8a04',0,0,0],
+      [0,'#ca8a04','#fbbf24','#fbbf24','#ca8a04',0,0,0],
+      [0,'#78350f','#78350f',0,'#78350f','#78350f',0,0],
+      [0,'#78350f','#78350f',0,'#78350f','#78350f',0,0],
+      [0,0,0,0,0,0,0,0]
+    ]
+  }
+};
+
+// Draw a pixel character on a canvas element
+function drawPixelChar(canvas, charKey, scale=1, facingLeft=false) {
+  const char = PX_CHARS[charKey];
+  if(!char) return;
+  const sz = 8 * scale;
+  canvas.width = sz;
+  canvas.height = sz;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,sz,sz);
+  ctx.imageSmoothingEnabled = false;
+
+  const pixels = char.pixels;
+  for(let r=0; r<pixels.length; r++){
+    const row = pixels[r];
+    for(let c=0; c<row.length; c++){
+      const col = row[c];
+      if(!col) continue;
+      ctx.fillStyle = col;
+      const drawC = facingLeft ? (row.length-1-c) : c;
+      ctx.fillRect(drawC*scale, r*scale, scale, scale);
+    }
+  }
+}
+
+// Shadow under character
+function drawShadow(canvas, scale=1) {
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  ctx.fillRect(scale, 7*scale, 4*scale, scale);
+}
+
+// Create a pixel visitor element
+function createPixelVisitor(charKey) {
+  const scale = 3;
+  const sz = 8 * scale;
+  const wrapper = document.createElement('div');
+  wrapper.className = 'visitor';
+  wrapper.style.width = sz + 'px';
+  wrapper.style.height = sz + 'px';
+
+  const canvas = document.createElement('canvas');
+  canvas.className = 'px-char';
+  canvas.style.imageRendering = 'pixelated';
+  canvas.style.display = 'block';
+  drawPixelChar(canvas, charKey, scale);
+  drawShadow(canvas, scale);
+  wrapper.appendChild(canvas);
+  wrapper._charKey = charKey;
+  wrapper._scale = scale;
+  return wrapper;
+}
+
+// Staff pixel element (seated, smaller)
+function createPixelStaff(charKey) {
+  const scale = 2;
+  const sz = 8 * scale;
+  const wrapper = document.createElement('div');
+  wrapper.className = 'staff-on-map';
+  wrapper.style.width = sz + 'px';
+  wrapper.style.height = sz + 'px';
+
+  const canvas = document.createElement('canvas');
+  canvas.style.imageRendering = 'pixelated';
+  canvas.style.display = 'block';
+  drawPixelChar(canvas, charKey, scale);
+  wrapper.appendChild(canvas);
+  return wrapper;
+}
+
+// ═══════════════════════════════════════════════════
+//  ANIMATED VISITORS ON MAP
+// ═══════════════════════════════════════════════════
+const MAX_VISITORS=8;
+let visitorDots=[];
+let visitorLayer;
+
+function initVisitorLayer(){
+  visitorLayer=document.getElementById('visitor-layer');
+}
+
+// Get pixel position of cell center relative to visitor layer
+function getCellPos(cellIdx){
+  const canvas=document.getElementById('lib-map-canvas');
+  const layerRect=visitorLayer.getBoundingClientRect();
+  const cells=canvas.querySelectorAll('.map-cell');
+  if(!cells[cellIdx]) return null;
+  const rect=cells[cellIdx].getBoundingClientRect();
+  const scale = 3;
+  const sz = 8 * scale;
+  return{
+    x:rect.left-layerRect.left+rect.width/2-sz/2,
+    y:rect.top-layerRect.top+rect.height/2-sz/2
+  };
+}
+
+// Get walkable cells (corridors + rooms)
+function getWalkableCells(){
+  const walkable=[];
+  for(let i=0;i<80;i++){
+    if(FIXED_CELLS[i]==='wall') continue;
+    if(FIXED_CELLS[i]==='entrance') {walkable.push(i);continue;}
+    if(FIXED_CELLS[i]==='corridor') {walkable.push(i);continue;}
+    if(G.mapCells[i]&&SECTIONS[G.mapCells[i]]) walkable.push(i);
+  }
+  return walkable;
+}
+
+// Get room cells only (for visitors to visit)
+function getRoomCells(){
+  const rooms=[];
+  for(let i=0;i<80;i++){
+    if(G.mapCells[i]&&SECTIONS[G.mapCells[i]]) rooms.push(i);
+  }
+  return rooms;
+}
+
+// Pixel visitor character types
+const VISITOR_CHARS = ['visitor_m','visitor_f','visitor_student','visitor_prof','visitor_child'];
+
+// Spawn a pixel visitor
+function spawnVisitor(){
+  if(visitorDots.length>=MAX_VISITORS) return;
+  if(!visitorLayer) return;
+  const entrance=[idx(7,4),idx(7,5)];
+  const startCell=entrance[rand(0,1)];
+  const pos=getCellPos(startCell);
+  if(!pos) return;
+
+  const charKey = VISITOR_CHARS[rand(0, VISITOR_CHARS.length-1)];
+  const dot = createPixelVisitor(charKey);
+  dot.style.left=pos.x+'px';
+  dot.style.top=pos.y+'px';
+  visitorLayer.appendChild(dot);
+
+  const visitorObj={el:dot,cell:startCell,targetCell:null,timeout:null,alive:true};
+  visitorDots.push(visitorObj);
+  scheduleVisitorMove(visitorObj);
+}
+
+function scheduleVisitorMove(v){
+  if(!v.alive) return;
+  const delay=rand(1500,4000);
+  v.timeout=setTimeout(()=>{
+    if(!v.alive) return;
+    moveVisitor(v);
+  },delay);
+}
+
+function moveVisitor(v){
+  if(!v.alive) return;
+  const walkable=getWalkableCells();
+  if(walkable.length===0) return;
+
+  // Sometimes go to room, sometimes wander corridor
+  const rooms=getRoomCells();
+  let targetCell;
+
+  const shouldLeave=rand(1,8)===1; // 1 in 8 chance to leave
+  if(shouldLeave){
+    // Go to entrance and despawn
+    const entrance=[idx(7,4),idx(7,5)];
+    targetCell=entrance[rand(0,1)];
+    v.alive=false; // Mark for removal
+    const pos=getCellPos(targetCell);
+    if(pos){
+      v.el.style.left=pos.x+'px';
+      v.el.style.top=pos.y+'px';
+      v.el.classList.add('moving');
+    }
+    setTimeout(()=>{
+      v.el.remove();
+      visitorDots=visitorDots.filter(d=>d!==v);
+    },2000);
+    return;
+  }
+
+  if(rooms.length>0&&rand(1,3)===1){
+    targetCell=rooms[rand(0,rooms.length-1)];
+  } else {
+    const corridors=walkable.filter(c=>FIXED_CELLS[c]==='corridor'||FIXED_CELLS[c]==='entrance');
+    targetCell=corridors.length>0?corridors[rand(0,corridors.length-1)]:walkable[rand(0,walkable.length-1)];
+  }
+
+  // Flip character direction based on horizontal movement
+  const oldPos=getCellPos(v.cell);
+  v.cell=targetCell;
+  const pos=getCellPos(targetCell);
+  if(pos && oldPos){
+    const movingLeft = pos.x < oldPos.x;
+    // Redraw character facing direction
+    const canvas = v.el.querySelector('canvas');
+    if(canvas && v.el._charKey){
+      drawPixelChar(canvas, v.el._charKey, v.el._scale, movingLeft);
+      drawShadow(canvas, v.el._scale);
+    }
+    v.el.style.left=pos.x+'px';
+    v.el.style.top=pos.y+'px';
+    v.el.classList.add('moving');
+    setTimeout(()=>{if(v.el)v.el.classList.remove('moving');},1800);
+  }
+  scheduleVisitorMove(v);
+}
+
+function tickVisitors(){
+  // Spawn new visitors occasionally
+  const hasLoan=G.mapCells.includes('loan');
+  const hasAny=G.mapCells.filter(c=>c&&SECTIONS[c]).length>0;
+  if(!hasAny) return;
+  if(visitorDots.length<MAX_VISITORS&&rand(1,4)===1){
+    spawnVisitor();
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  STAFF VISUAL ON MAP - PIXEL ART
+// ═══════════════════════════════════════════════════
+
+// Map staff IDs to pixel char keys
+const STAFF_PIXEL_CHARS = {
+  cataloger: 'staff_cataloger',
+  reference: 'staff_reference',
+  archivist: 'staff_archivist',
+  volunteer: 'staff_volunteer'
+};
+
+function renderStaffOnMap(){
+  // Remove old staff badges
+  document.querySelectorAll('.staff-on-map-badge').forEach(e=>e.remove());
+  const canvas=document.getElementById('lib-map-canvas');
+  const cells=canvas.querySelectorAll('.map-cell');
+
+  STAFF_DEF.forEach(st=>{
+    if(!G.staff[st.id]) return;
+    // Find their desk cell
+    const deskSection=G.mapCells.includes(st.desk)?st.desk:(G.mapCells.includes(st.deskFallback)?st.deskFallback:null);
+    if(!deskSection) return;
+    const cellIdx=G.mapCells.indexOf(deskSection);
+    if(cellIdx<0) return;
+    const cell=cells[cellIdx];
+    if(!cell) return;
+    const badge=document.createElement('div');
+    badge.className='staff-on-map-badge';
+    badge.style.cssText=`position:absolute;top:2px;right:2px;font-size:.65rem;z-index:5;line-height:1;filter:drop-shadow(0 0 3px rgba(34,197,94,.8));animation:pulse 2s infinite`;
+    badge.textContent=st.emoji;
+    badge.title=st.name+' – '+st.role;
+    cell.appendChild(badge);
+  });
+}
+
+// ═══════════════════════════════════════════════════
+//  HR RENDER
+// ═══════════════════════════════════════════════════
+function renderHR(){
+  // Staff productivity summary
+  const sp=document.getElementById('staff-productivity');
+  sp.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px">
+  ${STAFF_DEF.map(s=>{
+    const hired=G.staff[s.id];
+    const morale=G.staffMorale[s.id];
+    const loc=hired?(G.mapCells.includes(s.desk)?SECTIONS[s.desk]?.name:G.mapCells.includes(s.deskFallback)?SECTIONS[s.deskFallback]?.name:'جوّال'):null;
+    return`<div style="background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:10px;display:flex;align-items:center;gap:8px">
+      <div style="font-size:1.4rem">${s.icon}</div>
+      <div style="flex:1">
+        <div style="font-size:.72rem;font-weight:700">${s.name}</div>
+        ${hired&&loc?`<div class="sc-location"><span class="loc-dot"></span>${loc}</div>`:''}
+        <div style="font-size:.62rem;color:var(--muted)">خدم: ${G.staffServiceCount[s.id]} | معنوية: ${morale}%</div>
+      </div>
+      <span style="font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:8px;${hired?'background:rgba(34,197,94,.15);color:var(--brand);border:1px solid rgba(34,197,94,.25)':'background:rgba(107,114,128,.12);color:var(--muted);border:1px solid rgba(107,114,128,.2)'}">${hired?'فعّال':'غائب'}</span>
+    </div>`;
+  }).join('')}
+  </div>`;
+
+  const grid=document.getElementById('hr-grid');
+  grid.innerHTML='';
+  const salMult=1+(G.level-1)*0.18;
+  STAFF_DEF.forEach(s=>{
+    const hired=G.staff[s.id];
+    const morale=G.staffMorale[s.id];
+    const effSal=Math.round(s.salary*salMult);
+    const card=document.createElement('div');
+    card.className=`staff-card ${hired?'hired':'available'}`;
+    const deskLabel=SECTIONS[s.desk]?.name||'جوّال';
+    card.innerHTML=`
+      <div class="sc-badge ${hired?'hired':'avail'}">${hired?'موظف حالياً':'متاح'}</div>
+      <div class="sc-icon">${s.icon}</div>
+      <div class="sc-name">${s.name}</div>
+      <div class="sc-role">🏛️ ${s.role}</div>
+      ${hired?`<div class="sc-location"><span class="loc-dot"></span>مكتبه في: ${deskLabel}</div>`:''}
+      <div class="sc-skills">${s.skills.map(sk=>`<span class="skill-tag">${sk}</span>`).join('')}</div>
+      <div class="sc-salary">💰 الراتب: ${fmt(effSal)} ج/شهر${G.level>1?` (×${salMult.toFixed(2)})`:''}</div>
+      <div class="sc-effect">📈 ${s.effect}</div>
+      <div class="sc-morale">
+        <div style="display:flex;justify-content:space-between;font-size:.65rem"><span style="color:var(--muted)">المعنوية</span><span style="color:${morale>60?'var(--brand)':morale>35?'var(--warn)':'var(--danger)'}">${morale}%</span></div>
+        <div class="sc-morale-bar"><div class="sc-morale-fill" style="width:${morale}%;background:${morale>60?'var(--brand)':morale>35?'var(--warn)':'var(--danger)'}"></div></div>
+      </div>
+      <button class="sc-btn ${hired?'fire':'hire'}" data-id="${s.id}">${hired?'🚫 إنهاء الخدمة':'✅ توظيف الآن'}</button>
+    `;
+    card.querySelector('button').addEventListener('click',()=>{
+      if(!hired){
+        if(G.budget<effSal*2){showToast('الميزانية غير كافية للتوظيف!','error');return;}
+        G.staff[s.id]=true;G.staffMorale[s.id]=80;
+        addFinance('توظيف: '+s.name,'expense',effSal);
+        addLog('success',`👤 تم توظيف ${s.icon} ${s.name} (${fmt(effSal)} ج/شهر)`);
+        showToast('✅ تم توظيف '+s.name,'success');
+        if(!G.achievements.firstStaff){G.achievements.firstStaff=true;unlockAchievement('👤','أول موظف');}
+      } else {
+        G.staff[s.id]=false;
+        addLog('warning',`👤 إنهاء خدمة ${s.name}.`);
+        showToast('تم إنهاء خدمة '+s.name,'warn');
+      }
+      renderHR();renderMap();renderHUD();checkQuests();
+    });
+    grid.appendChild(card);
+  });
+  const needArch=G.mapCells.includes('manuscript')&&!G.staff.archivist;
+  document.getElementById('hr-alert').style.display=needArch?'block':'none';
+}
+
+// ═══════════════════════════════════════════════════
+//  ACQUISITION RENDER
+// ═══════════════════════════════════════════════════
+function renderAcquisition(){
+  const grid=document.getElementById('acq-grid');
+  grid.innerHTML='';
+  ACQ_ITEMS.forEach(item=>{
+    const count=G.acqCounts[item.id]||0;
+    const canAfford=G.budget>=item.cost;
+    const levelOk=G.level>=item.reqLevel;
+    const sectionOk=!item.reqSection||G.mapCells.includes(item.reqSection);
+    const staffOk=!item.reqStaff||G.staff[item.reqStaff];
+    const canBuy=canAfford&&levelOk&&sectionOk&&staffOk;
+    const card=document.createElement('div');
+    card.className='acq-card';
+    let reqHTML='';
+    if(!levelOk) reqHTML+=`<div class="acq-req unmet">🔒 يتطلب المستوى ${item.reqLevel}</div>`;
+    else if(!sectionOk) reqHTML+=`<div class="acq-req unmet">⚠️ يتطلب: ${SECTIONS[item.reqSection]?.name}</div>`;
+    else if(!staffOk) reqHTML+=`<div class="acq-req unmet">👤 يتطلب: ${STAFF_DEF.find(d=>d.id===item.reqStaff)?.name}</div>`;
+    else reqHTML+=`<div class="acq-req met">✅ متاح للاقتناء</div>`;
+    if(!levelOk) card.innerHTML=`<div class="acq-level-lock">المستوى ${item.reqLevel}+</div>`;
+    card.innerHTML+=`
+      <div class="acq-icon">${item.icon}</div>
+      <div class="acq-name">${item.name}</div>
+      <div class="acq-desc">${item.desc}</div>
+      <div class="acq-stats">
+        ${item.collAdd>0?`<span class="acq-stat cyan">📦 +${item.collAdd} وعاء</span>`:''}
+        ${item.qualAdd>0?`<span class="acq-stat green">🎯 +${item.qualAdd}% جودة</span>`:''}
+        ${item.satAdd>0?`<span class="acq-stat gold">😊 +${item.satAdd}% رضا</span>`:''}
+      </div>
+      ${reqHTML}
+      <div class="acq-price">💰 ${fmt(item.cost)} جنيه</div>
+      <div class="acq-count">اقتُني ${count} ${count===0?'مرة':count<3?'مرات':'مرات'}</div>
+      <button class="acq-btn" ${!canBuy?'disabled':''} data-id="${item.id}">${canBuy?'اقتناء الآن ✅':(!canAfford?'لا تكفي الميزانية':'غير متاح حالياً')}</button>
+    `;
+    card.querySelector('button').addEventListener('click',()=>{
+      if(!canBuy) return;
+      G.budget-=item.cost;
+      G.acqCounts[item.id]=(G.acqCounts[item.id]||0)+1;
+      G.collections+=item.collAdd;
+      G.quality=clamp(G.quality+item.qualAdd,0,100);
+      G.satisfaction=clamp(G.satisfaction+item.satAdd,0,100);
+      G.score+=Math.round(item.cost/15);
+      addFinance('اقتناء: '+item.name,'expense',item.cost);
+      addLog('success',`📦 تم اقتناء "${item.name}" (+${item.qualAdd}% جودة، -${fmt(item.cost)} ج)`);
+      showToast('✅ اقتناء ناجح: '+item.name,'success');
+      floatNum('-'+fmt(item.cost)+' ج','neg');
+      if(item.id==='database'&&!G.achievements.firstDB){G.achievements.firstDB=true;unlockAchievement('🖥️','أول قاعدة بيانات');}
+      renderAcquisition();renderHUD();checkQuests();
+    });
+    grid.appendChild(card);
+  });
+}
+
+// ═══════════════════════════════════════════════════
+//  ANALYTICS RENDER
+// ═══════════════════════════════════════════════════
+function renderAnalytics(){
+  const totalSal=STAFF_DEF.reduce((a,s)=>a+(G.staff[s.id]?s.salary*(1+(G.level-1)*0.18):0),0);
+  const sections=G.mapCells.filter(v=>v&&SECTIONS[v]).length;
+  document.getElementById('analytics-grid').innerHTML=`
+    <div class="ana-card"><div class="ana-num" style="color:var(--brand)">${fmt(G.budget)}</div><div class="ana-label">الميزانية (ج)</div></div>
+    <div class="ana-card"><div class="ana-num" style="color:var(--accent)">${Math.round(G.satisfaction)}%</div><div class="ana-label">رضا المستفيدين</div></div>
+    <div class="ana-card"><div class="ana-num" style="color:var(--brand)">${Math.round(G.quality)}%</div><div class="ana-label">جودة الفهرسة</div></div>
+    <div class="ana-card"><div class="ana-num" style="color:var(--warn)">${fmt(G.collections)}</div><div class="ana-label">إجمالي الأوعية</div></div>
+    <div class="ana-card"><div class="ana-num" style="color:var(--brand)">${G.totalServiced}</div><div class="ana-label">مستفيدون مخدومون</div></div>
+    <div class="ana-card"><div class="ana-num" style="color:var(--danger)">${G.totalRejected}</div><div class="ana-label">طلبات لم تُخدم</div></div>
+    <div class="ana-card"><div class="ana-num" style="color:var(--danger)">${fmt(totalSal)}</div><div class="ana-label">رواتب شهرية</div></div>
+    <div class="ana-card"><div class="ana-num" style="color:var(--purple)">${sections}</div><div class="ana-label">أقسام مفعّلة</div></div>
+    <div class="ana-card"><div class="ana-num" style="color:var(--warn)">${fmt(G.score)}</div><div class="ana-label">النقاط الكلية</div></div>
+  `;
+
+  const avg=(G.satisfaction+G.quality)/2;
+  let stars,label,color;
+  if(avg>=90){stars=5;label='ممتاز – نموذج يُحتذى به';color='var(--brand)';}
+  else if(avg>=75){stars=4;label='جيد جداً – مستوى أكاديمي رفيع';color='var(--accent)';}
+  else if(avg>=60){stars=3;label='جيد – يحتاج تطوير مستمر';color='var(--warn)';}
+  else if(avg>=40){stars=2;label='مقبول – أداء دون المأمول';color='#f97316';}
+  else{stars=1;label='ضعيف – خطر إغلاق وشيك';color='var(--danger)';}
+  document.getElementById('analytics-rating').innerHTML=`
+    <div style="font-size:1.5rem;margin-bottom:5px">${'⭐'.repeat(stars)}${'☆'.repeat(5-stars)}</div>
+    <div style="font-size:.78rem;font-weight:800;color:${color}">${label}</div>
+    <div style="font-size:.65rem;color:var(--muted);margin-top:3px">متوسط رضا + جودة: ${Math.round(avg)}%</div>`;
+
+  const chartEl=document.getElementById('monthly-chart');
+  chartEl.innerHTML='';
+  const hist=G.monthlyHistory.slice(-8);
+  const maxVal=Math.max(...hist.map(h=>Math.max(h.income,h.expense,1)),1);
+  hist.forEach(h=>{
+    const incH=Math.max(3,Math.round((h.income/maxVal)*68));
+    const expH=Math.max(3,Math.round((h.expense/maxVal)*68));
+    chartEl.innerHTML+=`
+      <div class="chart-bar-wrap">
+        <div class="chart-bar-val">${fmt(h.income)}</div>
+        <div class="chart-bar" style="height:${incH}px;background:linear-gradient(180deg,var(--brand),rgba(34,197,94,.3))" title="إيراد: ${fmt(h.income)} ج"></div>
+        <div class="chart-bar" style="height:${expH}px;background:linear-gradient(180deg,var(--danger),rgba(239,68,68,.3))" title="مصروف: ${fmt(h.expense)} ج"></div>
+        <div class="chart-bar-label">ش${h.month}</div>
+      </div>`;
+  });
+  if(!hist.length) chartEl.innerHTML=`<div style="color:var(--muted);font-size:.76rem;padding:20px">لا بيانات شهرية بعد</div>`;
+
+  document.getElementById('expense-log').innerHTML=G.financeLedger.slice(0,20).map(e=>`
+    <tr>
+      <td>${e.label}</td>
+      <td><span class="${e.type==='income'?'etbl-income':'etbl-expense'}">${e.type==='income'?'إيراد':'مصروف'}</span></td>
+      <td class="${e.type==='income'?'etbl-income':'etbl-expense'}">${e.type==='income'?'+':'-'}${fmt(e.amount)} ج</td>
+      <td style="color:var(--muted);font-size:.66rem">${e.date}</td>
+    </tr>`).join('')||`<tr><td colspan="4" style="text-align:center;padding:16px;color:var(--muted)">لا معاملات بعد</td></tr>`;
+}
+
+// ═══════════════════════════════════════════════════
+//  CRISES
+// ═══════════════════════════════════════════════════
+let crisisTimer=null;
+function triggerCrisis(){
+  if(G.crisisActive||G.gameOver) return;
+  const c=CRISES[rand(0,CRISES.length-1)];
+  G.crisisActive=true;
+  document.getElementById('modal-icon').textContent=c.icon;
+  document.getElementById('modal-severity').className=`modal-severity ${c.severity}`;
+  document.getElementById('modal-severity').textContent=c.severityLabel;
+  document.getElementById('modal-title').textContent=c.title;
+  document.getElementById('modal-desc').textContent=c.desc;
+  const choicesEl=document.getElementById('modal-choices');
+  choicesEl.innerHTML='';
+  c.choices.forEach(ch=>{
+    const btn=document.createElement('button');
+    btn.className='modal-choice-btn';
+    btn.innerHTML=`${ch.label}<div class="choice-tags">${ch.tags.map(t=>`<span class="ctag">${t}</span>`).join('')}</div>`;
+    btn.addEventListener('click',()=>resolveCrisis(c,ch));
+    choicesEl.appendChild(btn);
+  });
+  document.getElementById('modal-overlay').classList.add('active');
+  if(!G.achievements.firstCrisis){G.achievements.firstCrisis=true;unlockAchievement('⚠️','أول أزمة');}
+  if(c.severity==='sev-high'){
+    let countdown=30;
+    const timerEl=document.getElementById('crisis-timer');
+    const countEl=document.getElementById('crisis-countdown');
+    timerEl.style.display='block';
+    countEl.textContent=countdown;
+    crisisTimer=setInterval(()=>{
+      countdown--;
+      countEl.textContent=countdown;
+      if(countdown<=0){
+        clearInterval(crisisTimer);
+        const auto=c.choices[1];
+        resolveCrisis(c,auto);
+        addLog('danger',`⏰ انتهى وقت القرار – تم تطبيق الخيار الأسوأ تلقائياً!`);
+      }
+    },1000);
+  }
+}
+
+function resolveCrisis(c,ch){
+  if(crisisTimer) clearInterval(crisisTimer);
+  document.getElementById('crisis-timer').style.display='none';
+  document.getElementById('modal-overlay').classList.remove('active');
+  G.crisisActive=false;G.crisisCooldown=20;G.crisisManaged++;
+  if(ch.cost) G.budget=Math.max(0,G.budget+ch.cost);
+  if(ch.qualLoss) G.quality=clamp(G.quality+ch.qualLoss,0,100);
+  if(ch.satLoss) G.satisfaction=clamp(G.satisfaction+ch.satLoss,0,100);
+  if(ch.qualBonus) G.quality=clamp(G.quality+ch.qualBonus,0,100);
+  if(ch.satBonus) G.satisfaction=clamp(G.satisfaction+ch.satBonus,0,100);
+  if(ch.collBonus) G.collections+=ch.collBonus;
+  if(ch.collLoss) G.collections=Math.max(0,G.collections-ch.collLoss);
+  if(ch.scoreBon) G.score+=ch.scoreBon;
+  G.score+=30;
+  addLog('warning',`⚡ أزمة "${c.title}" → قرار: "${ch.label}"`);
+  if(ch.cost<0) floatNum(ch.cost+' ج','neg');
+  renderHUD();checkQuests();
+}
+
+// ═══════════════════════════════════════════════════
+//  LEVEL UP
+// ═══════════════════════════════════════════════════
+function checkLevelUp(){
+  const req=G.levelReqs[G.level];
+  if(!req||G.level>=4) return;
+  if(G.budget>=req.budget&&G.satisfaction>=req.satisfaction&&G.quality>=req.quality){
+    G.level++;
+    document.getElementById('lu-title').textContent='🎓 ترقية للمستوى '+G.level+'!';
+    document.getElementById('lu-sub').textContent=G.levelNames[G.level-1];
+    document.getElementById('lu-perks').innerHTML=G.levelPerks[G.level-1].map(p=>`<div class="lu-perk">✅ ${p}</div>`).join('');
+    document.getElementById('levelup-overlay').classList.add('active');
+    if(G.level===2){G.budget+=5000;G.achievements.level2=true;unlockAchievement('🎓','المستوى 2');}
+    if(G.level===3){G.achievements.level3=true;unlockAchievement('🏛️','المستوى 3');}
+    addLog('success',`🎓 ترقية! المكتبة الآن: "${G.levelNames[G.level-1]}" (المستوى ${G.level})`);
+    renderHUD();
+  }
+}
+document.getElementById('levelup-btn').addEventListener('click',()=>document.getElementById('levelup-overlay').classList.remove('active'));
+
+// ═══════════════════════════════════════════════════
+//  MONTHLY CYCLE
+// ═══════════════════════════════════════════════════
+function doMonthlyCycle(){
+  G.monthlyHistory.push({month:G.month,income:G.monthlyIncome,expense:G.monthlyExpense});
+  if(G.monthlyHistory.length>12) G.monthlyHistory.shift();
+  G.visitorsToday=0;
+
+  const salMult=1+(G.level-1)*0.18;
+  let totalSal=0;
+  STAFF_DEF.forEach(s=>{if(G.staff[s.id])totalSal+=s.salary*salMult;});
+  if(totalSal>0){
+    G.budget-=totalSal;
+    addFinance('رواتب الشهر '+G.month,'expense',totalSal);
+    addLog('warning',`💼 رواتب شهر ${G.month}: ${fmt(totalSal)} ج`);
+    floatNum('-'+fmt(totalSal)+' ج','neg');
+  }
+
+  if(G.staff.cataloger){G.quality=clamp(G.quality+8+(G.acqCounts.database>0?4:0),0,100);}
+  if(G.staff.reference){G.satisfaction=clamp(G.satisfaction+6+(G.mapCells.includes('reference')?3:0),0,100);}
+  if(G.staff.archivist&&G.mapCells.includes('manuscript')){G.quality=clamp(G.quality+4,0,100);G.collections+=15;}
+  if(G.staff.volunteer){G.satisfaction=clamp(G.satisfaction+2,0,100);}
+
+  Object.keys(G.staffMorale).forEach(k=>{
+    if(G.staff[k]) G.staffMorale[k]=clamp(G.staffMorale[k]-2+rand(0,3),10,100);
+  });
+
+  const{penalties,bonuses}=calcPenaltiesAndBonuses();
+  penalties.forEach(p=>{G.satisfaction=clamp(G.satisfaction+p.sat,0,100);G.quality=clamp(G.quality+p.qual,0,100);});
+  bonuses.forEach(b=>{G.satisfaction=clamp(G.satisfaction+b.sat,0,100);G.quality=clamp(G.quality+b.qual,0,100);});
+
+  if(!G.staff.cataloger&&G.quality>15) G.quality=clamp(G.quality-3,0,100);
+  if(!G.staff.reference&&G.satisfaction>20) G.satisfaction=clamp(G.satisfaction-2,0,100);
+
+  if(G.satisfaction>=90&&!G.achievements.satisfaction90){G.achievements.satisfaction90=true;unlockAchievement('😍','رضا 90%');}
+  if(G.quality>=80&&!G.achievements.quality80){G.achievements.quality80=true;unlockAchievement('⭐','جودة 80%');}
+
+  G.score+=Math.round(G.satisfaction*0.3+G.quality*0.3+G.collections/50+G.level*10);
+  G.monthlyIncome=0;G.monthlyExpense=0;
+
+  addLog('info',`📅 إغلاق شهر ${G.month}/${G.year} | الميزانية: ${fmt(G.budget)} ج`);
+  G.month++;
+  if(G.month>12){G.month=1;G.year++;}
+  checkLevelUp();
+  if(document.querySelector('#tab-analytics.active')) renderAnalytics();
+  renderHUD();renderMap();
+}
+
+// ═══════════════════════════════════════════════════
+//  GAME OVER
+// ═══════════════════════════════════════════════════
+function endGame(reason){
+  if(G.gameOver) return;
+  G.gameOver=true;
+  clearInterval(gameLoop);
+  if(crisisTimer) clearInterval(crisisTimer);
+  document.getElementById('go-title').textContent=reason==='bankrupt'?'💔 إفلاس المكتبة!':'😞 انهيار الخدمة!';
+  document.getElementById('go-sub').textContent=reason==='bankrupt'?'الميزانية وصلت للصفر':'رضا المستفيدين انهار';
+  document.getElementById('go-stats').innerHTML=`
+    <div class="go-stat"><div class="go-stat-num">${fmt(G.score)}</div><div class="go-stat-label">النقاط</div></div>
+    <div class="go-stat"><div class="go-stat-num">${G.level}</div><div class="go-stat-label">المستوى</div></div>
+    <div class="go-stat"><div class="go-stat-num">${G.totalServiced}</div><div class="go-stat-label">مخدومون</div></div>
+    <div class="go-stat"><div class="go-stat-num">${G.month-1}</div><div class="go-stat-label">أشهر</div></div>
+    <div class="go-stat"><div class="go-stat-num">${Object.values(G.achievements).filter(Boolean).length}</div><div class="go-stat-label">إنجازات</div></div>
+    <div class="go-stat"><div class="go-stat-num">${fmt(G.collections)}</div><div class="go-stat-label">أوعية</div></div>
+  `;
+  document.getElementById('gameover-overlay').classList.add('active');
+}
+document.getElementById('restart-btn').addEventListener('click',()=>{
+  document.getElementById('gameover-overlay').classList.remove('active');
+  initGame();
+});
+
+// ═══════════════════════════════════════════════════
+//  ACHIEVEMENTS
+// ═══════════════════════════════════════════════════
+const ACHIEVEMENTS=[
+  {id:'firstSection',icon:'🏗️',label:'أول قسم'},
+  {id:'firstStaff',icon:'👤',label:'أول موظف'},
+  {id:'firstDB',icon:'🖥️',label:'أول قاعدة'},
+  {id:'firstCrisis',icon:'⚠️',label:'أول أزمة'},
+  {id:'level2',icon:'🎓',label:'المستوى 2'},
+  {id:'level3',icon:'🏛️',label:'المستوى 3'},
+  {id:'satisfaction90',icon:'😍',label:'رضا 90%'},
+  {id:'quality80',icon:'⭐',label:'جودة 80%'}
+];
+function unlockAchievement(icon,label){
+  showToast('🏅 إنجاز جديد: '+label,'info',4500);
+  renderAchievements();
+}
+function renderAchievements(){
+  document.getElementById('achievements-bar').innerHTML=ACHIEVEMENTS.map(a=>`
+    <div class="ach-badge ${G.achievements[a.id]?'earned':''}">${a.icon} ${a.label}</div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════
+//  QUESTS
+// ═══════════════════════════════════════════════════
+const QUESTS=[
+  {id:'q1',title:'الخطوة الأولى',desc:'ركّب قسم الإعارة',icon:'📤',check:()=>G.mapCells.includes('loan'),reward:{budget:500,score:50},done:false},
+  {id:'q2',title:'الفهرسة العلمية',desc:'وظّف مفهرساً متخصصاً',icon:'🗂️',check:()=>G.staff.cataloger,reward:{quality:10,score:80},done:false},
+  {id:'q3',title:'حارس التراث',desc:'ركّب قاعة المخطوطات ووظّف أمين مخطوطات',icon:'📜',check:()=>G.mapCells.includes('manuscript')&&G.staff.archivist,reward:{budget:1500,score:150},done:false},
+  {id:'q4',title:'التحول الرقمي',desc:'أنشئ المعمل الرقمي واشترك في قواعد بيانات',icon:'💻',check:()=>G.mapCells.includes('digital')&&G.acqCounts.database>0,reward:{quality:15,satisfaction:10,score:200},done:false},
+  {id:'q5',title:'الأكاديمية المتكاملة',desc:'وصل رضا المستفيدين إلى 80%',icon:'😊',check:()=>G.satisfaction>=80,reward:{budget:3000,score:300},done:false},
+  {id:'q6',title:'المكتبة المثالية',desc:'حقق جودة 70% مع توظيف جميع الكوادر',icon:'⭐',check:()=>G.quality>=70&&Object.values(G.staff).every(Boolean),reward:{budget:5000,score:500},done:false},
+  {id:'q7',title:'مدير الأزمات',desc:'أدِر 3 أزمات بنجاح',icon:'🛡️',check:()=>G.crisisManaged>=3,reward:{score:400,satisfaction:8},done:false},
+  {id:'q8',title:'المقتني المتميز',desc:'اقتنِ 5 مصادر مختلفة',icon:'📦',check:()=>Object.values(G.acqCounts).filter(v=>v>0).length>=5,reward:{budget:2000,quality:10,score:250},done:false}
+];
+function checkQuests(){
+  QUESTS.forEach(q=>{
+    if(!q.done&&q.check()){
+      q.done=true;
+      if(q.reward.budget) G.budget+=q.reward.budget;
+      if(q.reward.quality) G.quality=clamp(G.quality+q.reward.quality,0,100);
+      if(q.reward.satisfaction) G.satisfaction=clamp(G.satisfaction+q.reward.satisfaction,0,100);
+      if(q.reward.score) G.score+=q.reward.score;
+      addLog('success',`🏅 مهمة مكتملة: "${q.title}"! ${q.reward.budget?'+'+fmt(q.reward.budget)+' ج':''} ${q.reward.score?'+'+q.reward.score+' نقطة':''}`);
+      showToast('🏅 "'+q.title+'" مكتملة!','info',5000);
+      renderQuestsWidget();
+    }
+  });
+}
+function renderQuestsWidget(){
+  const el=document.getElementById('quests-widget');
+  if(!el) return;
+  const pending=QUESTS.filter(q=>!q.done);
+  const done=QUESTS.filter(q=>q.done).length;
+  el.innerHTML=`<div style="font-size:.68rem;font-weight:700;color:var(--accent);margin-bottom:6px;display:flex;justify-content:space-between">
+    <span>🎯 المهام الجارية</span><span style="color:var(--brand)">${done}/${QUESTS.length}</span></div>
+  ${pending.slice(0,3).map(q=>`
+    <div style="background:var(--card2);border:1px solid var(--border2);border-radius:6px;padding:7px 9px;margin-bottom:5px">
+      <div style="font-size:.68rem;font-weight:700">${q.icon} ${q.title}</div>
+      <div style="font-size:.62rem;color:var(--muted);margin-top:1px">${q.desc}</div>
+      <div style="font-size:.58rem;color:var(--warn);margin-top:2px">${q.reward.budget?'💰 +'+fmt(q.reward.budget)+' ج ':''} ${q.reward.score?'⭐ +'+q.reward.score+' نقطة':''}</div>
+    </div>`).join('')}
+  ${!pending.length?'<div style="color:var(--brand);font-size:.72rem;text-align:center">🏆 جميع المهام مكتملة!</div>':''}`;
+}
+
+// ═══════════════════════════════════════════════════
+//  LEADERBOARD
+// ═══════════════════════════════════════════════════
+const MOCK_LB=[
+  {name:'د. أحمد السيد',score:18450,level:'مكتبة وطنية'},
+  {name:'م. سارة العمري',score:12300,level:'مكتبة إقليمية'},
+  {name:'أ. خالد النصر',score:9800,level:'مكتبة كلية'},
+  {name:'أنتَ',score:0,level:'جارٍ...',isUser:true}
+];
+function renderLeaderboard(){
+  const el=document.getElementById('leaderboard-widget');
+  if(!el) return;
+  MOCK_LB[3].score=G.score;
+  MOCK_LB[3].level=G.levelNames[G.level-1];
+  const sorted=[...MOCK_LB].sort((a,b)=>b.score-a.score);
+  el.innerHTML=`<div style="font-size:.68rem;font-weight:700;color:var(--warn);margin-bottom:6px">🏆 المتصدرون</div>`+
+  sorted.map((p,i)=>`
+    <div style="display:flex;align-items:center;gap:6px;padding:5px 7px;border-radius:6px;margin-bottom:3px;background:${p.isUser?'rgba(34,197,94,.07)':'rgba(255,255,255,.015)'};border:1px solid ${p.isUser?'rgba(34,197,94,.2)':'var(--border2)'}">
+      <span style="font-size:.75rem;font-weight:800;color:${i===0?'var(--warn)':i===1?'#9ca3af':i===2?'#cd7c2a':'var(--muted)'}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)}</span>
+      <div style="flex:1"><div style="font-size:.68rem;font-weight:700;color:${p.isUser?'var(--brand)':'var(--text)'}">${p.name}</div><div style="font-size:.58rem;color:var(--muted)">${p.level}</div></div>
+      <span style="font-size:.68rem;font-weight:800;color:var(--warn)">${fmt(p.score)}</span>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════
+//  TIPS
+// ═══════════════════════════════════════════════════
+const TIPS=[
+  '💡 ضع قسم الإعارة قريباً من المدخل لرفع رضا المستفيدين.',
+  '📊 بدون مفهرس، تتآكل الجودة 3% شهرياً.',
+  '📜 قاعة المخطوطات بدون أمين تُسبب خسارة في الرضا.',
+  '🤫 قاعة الاستذكار تحتاج عزل عن الأقسام الصاخبة.',
+  '💻 المعمل الرقمي يبلغ كفاءته الكاملة مع قواعد البيانات.',
+  '🗄️ الأرشيف بجانب المخطوطات يمنح +4% جودة/شهر.',
+  '💰 الرواتب ترتفع 18% مع كل ترقية. راقب ميزانيتك!',
+  '🎓 المتطوع الأكاديمي رخيص الأثمان وفعّال جداً.',
+  '⭐ رضا عالي + جودة عالية = ترقية أسرع للمستوى التالي.',
+  '🏛️ انتبه لأزمات الأجهزة الرقمية – قرارك في 30 ثانية!',
+];
+let tipIdx=0;
+function rotateTip(){
+  const el=document.getElementById('tip-text');
+  if(!el) return;
+  el.style.opacity='0';
+  setTimeout(()=>{el.textContent=TIPS[tipIdx%TIPS.length];el.style.opacity='1';tipIdx++;},300);
+}
+
+// Footer ticker
+let footerMsgs, footerIdx=0;
+function rotateFooter(){
+  footerMsgs=[
+    `📚 ${fmt(G.collections)} وعاء في المجموعات`,
+    `😊 رضا المستفيدين: ${Math.round(G.satisfaction)}%`,
+    `🎯 جودة الفهرسة: ${Math.round(G.quality)}%`,
+    `💰 الميزانية: ${fmt(G.budget)} ج`,
+    `⭐ النقاط: ${fmt(G.score)}`,
+    `🗓️ ${G.day}/${G.month}/${G.year}`,
+  ];
+  const el=document.getElementById('footer-ticker');
+  el.style.opacity='0';
+  setTimeout(()=>{el.textContent=footerMsgs[footerIdx%footerMsgs.length];el.style.opacity='1';el.style.transition='opacity .4s';footerIdx++;},250);
+}
+
+// ═══════════════════════════════════════════════════
+//  GAME LOOP + INIT
+// ═══════════════════════════════════════════════════
+let gameLoop, paused=false, tickCount=0;
+
+function gameTick(){
+  if(G.gameOver||paused) return;
+  tickCount++;
+
+  if(tickCount%3===0){
+    G.day++;
+    if(G.day>30){G.day=1;doMonthlyCycle();}
+    renderHUD();
+  }
+  if(tickCount%5===0){
+    const ev=VISITOR_EVENTS[rand(0,VISITOR_EVENTS.length-1)];
+    ev();renderHUD();
+    if(document.querySelector('#tab-acquisition.active')) renderAcquisition();
+    checkQuests();
+  }
+  if(tickCount%7===0) tickVisitors();
+  if(G.crisisCooldown>0) G.crisisCooldown--;
+  if(tickCount%45===0&&!G.crisisActive&&G.crisisCooldown===0&&rand(1,4)===1) triggerCrisis();
+  if(tickCount%60===0){
+    renderLeaderboard();
+    if(!G.staff.cataloger&&G.quality<50) addLog('warning','📉 جودة الفهرسة تتراجع – وظّف مفهرساً.');
+    if(G.mapCells.includes('manuscript')&&!G.staff.archivist) addLog('danger','📜 قاعة المخطوطات معطّلة – لا أمين مخطوطات.');
+    if(G.satisfaction<40) addLog('danger','😟 رضا المستفيدين خطير جداً!');
+  }
+  if(G.budget<=0){endGame('bankrupt');return;}
+  if(G.satisfaction<=0){endGame('satisfaction');return;}
+}
+
+function initGame(){
+  Object.assign(G,{
+    budget:10000,satisfaction:70,quality:40,collections:500,
+    score:0,day:1,month:1,year:2026,level:1,
+    mapCells:Array(80).fill(null),
+    selectedSection:null,
+    staff:{cataloger:false,reference:false,archivist:false,volunteer:false},
+    staffMorale:{cataloger:80,reference:80,archivist:80,volunteer:80},
+    staffServiceCount:{cataloger:0,reference:0,archivist:0,volunteer:0},
+    acqCounts:{books:0,database:0,manuscripts:0,periodicals:0,digital:0,equipment:0,rare:0},
+    financeLedger:[],monthlyIncome:0,monthlyExpense:0,
+    crisisActive:false,gameOver:false,
+    totalServiced:0,totalRejected:0,ticks:0,crisisCooldown:0,
+    achievements:{firstSection:false,firstStaff:false,firstDB:false,firstCrisis:false,level2:false,level3:false,satisfaction90:false,quality80:false},
+    monthlyHistory:[],logCount:0,gameSpeed:G.gameSpeed||1,currentFilter:'all',
+    crisisManaged:0,visitorsToday:0
+  });
+  // Replace fixed cells
+  G.mapCells[idx(7,4)]='entrance';
+  G.mapCells[idx(7,5)]='entrance';
+
+  allLogs=[];
+  tickCount=0;
+  paused=false;
+  // Clear visitors
+  if(visitorLayer) visitorLayer.innerHTML='';
+  visitorDots=[];
+  QUESTS.forEach(q=>q.done=false);
+
+  if(gameLoop) clearInterval(gameLoop);
+  gameLoop=setInterval(gameTick,1000/G.gameSpeed);
+
+  renderHUD();renderMap();renderHR();renderAcquisition();renderAnalytics();renderAchievements();renderQuestsWidget();renderLeaderboard();
+  addLog('success','🏛️ مرحباً في "مهندس المكتبة v2"! ابدأ بتركيب قسم الإعارة وتوظيف مفهرس.');
+  addLog('info','💡 اختر قسماً من الشريط الجانبي في تبويب "خريطة المكتبة" ثم انقر على أي خلية فارغة لتركيبه.');
+  addLog('info','💡 الميزانية الافتتاحية: 10,000 جنيه. راقب الرواتب الشهرية!');
+  showToast('🏛️ مرحباً! ابدأ بناء مكتبتك الآن.','success',4000);
+}
+
+// ─── TABS ───
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const tab=btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+tab).classList.add('active');
+    if(tab==='analytics') renderAnalytics();
+    else if(tab==='map'){renderMap();}
+    else if(tab==='hr') renderHR();
+    else if(tab==='acquisition') renderAcquisition();
+  });
+});
+
+// ─── SPEED ───
+document.querySelectorAll('.speed-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    G.gameSpeed=parseInt(btn.dataset.speed);
+    document.querySelectorAll('.speed-btn').forEach(b=>b.classList.remove('active-speed'));
+    btn.classList.add('active-speed');
+    clearInterval(gameLoop);
+    if(!paused) gameLoop=setInterval(gameTick,1000/G.gameSpeed);
+    showToast('السرعة: ×'+G.gameSpeed,'info',1500);
+  });
+});
+
+// ─── PAUSE ───
+document.getElementById('pause-btn').addEventListener('click',()=>{
+  paused=!paused;
+  document.getElementById('pause-btn').textContent=paused?'▶ استمرار':'⏸ إيقاف';
+  if(paused){clearInterval(gameLoop);showToast('⏸ اللعبة متوقفة','info',2000);}
+  else{gameLoop=setInterval(gameTick,1000/G.gameSpeed);showToast('▶ اللعبة مستمرة','success',1500);}
+});
+
+// ─── LOG FILTERS ───
+document.querySelectorAll('.log-filter-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    G.currentFilter=btn.dataset.filter;
+    document.querySelectorAll('.log-filter-btn').forEach(b=>b.classList.remove('active-filter'));
+    btn.classList.add('active-filter');
+    renderLog();
+  });
+});
+
+// ─── KEYBOARD ───
+document.addEventListener('keydown',e=>{
+  if(G.gameOver) return;
+  if(e.key==='1') document.querySelector('[data-tab="map"]')?.click();
+  else if(e.key==='2') document.querySelector('[data-tab="hr"]')?.click();
+  else if(e.key==='3') document.querySelector('[data-tab="acquisition"]')?.click();
+  else if(e.key==='4') document.querySelector('[data-tab="analytics"]')?.click();
+  else if(e.key==='Escape'){G.selectedSection=null;renderMSBSidebar();document.querySelectorAll('.map-cell').forEach(c=>c.classList.remove('build-target'));}
+  else if(e.key==='p'||e.key==='P') document.getElementById('pause-btn').click();
+});
+
+// ─── WELCOME SCREEN ───
+function showWelcome(){
+  const ov=document.createElement('div');
+  ov.id='welcome-ov';
+  ov.style.cssText=`position:fixed;inset:0;z-index:1000;background:rgba(8,15,26,.97);display:flex;align-items:center;justify-content:center;flex-direction:column;backdrop-filter:blur(20px);animation:fadeIn .5s ease`;
+  ov.innerHTML=`
+    <div style="text-align:center;max-width:540px;padding:20px">
+      <div style="font-size:3.5rem;margin-bottom:14px">📖</div>
+      <div style="font-size:1.5rem;font-weight:800;color:var(--brand);margin-bottom:7px">مهندس المكتبة</div>
+      <div style="font-size:.9rem;color:var(--accent);font-weight:600;margin-bottom:18px">بناء مكتبة المستقبل | Library Tycoon v2</div>
+      <div style="font-size:.78rem;color:var(--muted);line-height:1.9;margin-bottom:20px;background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:14px;text-align:right">
+        🗺️ الجديد في النسخة الثانية: خريطة مسقط حقيقية للمكتبة مع غرف يمكنك بناؤها في أماكن محددة.<br>
+        👥 زوار حقيقيون يتجولون في المكتبة ويدخلون الغرف ويتفاعلون مع خدماتها.<br>
+        🗂️ موظفوك يجلسون في مكاتبهم الفعلية ويظهرون على الخريطة بشكل مرئي.<br>
+        ⚡ كل قرار له ثمن وأثر – فكّر قبل أن تُنفق!
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px">
+        ${[['🗺️','خريطة حية','تصميم أقسام المكتبة'],['👣','زوار متحركون','تفاعل حقيقي'],['👤','موظفون فاعلون','يجلسون في أماكنهم'],['⚡','أزمات مفاجئة','قرارات صعبة']].map(([i,t,d])=>`
+        <div style="background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:10px;text-align:center">
+          <div style="font-size:1.3rem">${i}</div>
+          <div style="font-size:.65rem;color:var(--accent);font-weight:700;margin-top:3px">${t}</div>
+          <div style="font-size:.58rem;color:var(--muted);margin-top:1px">${d}</div>
+        </div>`).join('')}
+      </div>
+      <button id="start-btn" style="background:linear-gradient(135deg,var(--brand),#16a34a);color:#fff;border:none;border-radius:10px;padding:12px 36px;font-family:'Tajawal',sans-serif;font-size:.95rem;font-weight:800;cursor:pointer;box-shadow:0 0 28px rgba(34,197,94,.3)">
+        🚀 ابدأ البناء الآن
+      </button>
+    </div>`;
+  document.body.appendChild(ov);
+  document.getElementById('start-btn').addEventListener('click',()=>{
+    ov.style.opacity='0';ov.style.transition='opacity .4s';setTimeout(()=>ov.remove(),420);
+  });
+}
+
+// ─── BOOT ───
+window.addEventListener('DOMContentLoaded',()=>{
+  initVisitorLayer();
+  initGame();
+  showWelcome();
+  rotateTip();
+  setInterval(rotateTip,8000);
+  setInterval(rotateFooter,3500);
+  setInterval(renderLeaderboard,5000);
+  setTimeout(()=>showToast('⌨️ اختصارات: 1-4 للتبويبات | P إيقاف | Esc إلغاء التحديد','info',5000),8000);
+});
+</script>
+</body>
+</html>
